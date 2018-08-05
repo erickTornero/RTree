@@ -56,6 +56,9 @@ class Poligon{
         }
         return false;
     }
+    Poligon get_mbb_single_poligon(const Poligon & pol){
+
+    }
 };
 class RTree_node
 {
@@ -79,10 +82,11 @@ class RTree_node
 
 class RTree
 {
-    RTree_node *root;
-
     public:
-    RTree(int M){
+    RTree_node *root;
+    int M;
+    
+    RTree(int M):M(M){
         root = nullptr;
     }
     bool insert(Poligon p){
@@ -102,6 +106,31 @@ class RTree
                 if(region.is_Within_from(*node->Poligons[i])){
                     ans.push_back(node->Poligons[i]);
                 }
+            }
+        }
+    }
+    //Mbb must be obtained, however for the moment, sinple rectangles are used, 
+    //so the Poligon is the same of its MBB. Another parameter is needed
+    //or a struct could be used instead.
+    bool insert_poligon(RTree_node *node, Poligon *pol){
+        if(root == nullptr){
+            this->root = new RTree_node(true, this->M);
+            node = root;
+        }
+        if(!node->is_leaf){
+
+        }
+        //If the node is a leaf.
+        else{
+            //If there is space in the leaf.
+            if(node->elements <= node->M){
+                node->Poligons[node->elements] = pol;
+                //TODO: Maybe The MBB of object is missing
+                node->elements++;
+            }
+            //If there isn't space
+            else{
+
             }
         }
     }
