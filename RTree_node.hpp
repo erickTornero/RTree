@@ -31,12 +31,14 @@ class Poligon{
     Poligon(Point min, Point max):Pmin(min), Pmax(max){};
     friend class RTree;
     friend class RTree_node;
+    //If a poligon is contained totally in a Rectangle.
     bool is_Within_from(const Poligon & pol){
         if(this->Pmin >= pol.Pmin && this->Pmax <= pol.Pmax)
             return true;
         else
             return false;
     }
+    //If part or totaly of polygon intersect with a rectangle (Bonding box)
     bool intersect_BB_of(const Poligon & pol){
         if(this->Pmin <= pol.Pmax && this->Pmin >= pol.Pmin){
             return true;
@@ -56,6 +58,7 @@ class Poligon{
         }
         return false;
     }
+    //Must be implemented when poligons will be more than single rectangles.
     Poligon get_mbb_single_poligon(const Poligon & pol){
 
     }
@@ -89,10 +92,9 @@ class RTree
     RTree(int M):M(M){
         root = nullptr;
     }
-    bool insert(Poligon p){
-
-    }
-
+    //Basic search function, must be checked again, based on:
+    //http://www.mathcs.emory.edu/~cheung/Courses/554/Syllabus/3-index/R-tree3.html
+    //All Poligons that are contained in region are charged on 'ans' vector.
     void search(RTree_node * node, Poligon & region, std::vector<Poligon * > & ans){
         if(!node->is_leaf){
             for(int i = 0; i < node->elements; i++){
@@ -128,8 +130,9 @@ class RTree
                 //TODO: Maybe The MBB of object is missing
                 node->elements++;
             }
-            //If there isn't space
+            //If there isn't space on the current Leaf!
             else{
+                //Split the leaf into two leafs.
 
             }
         }
