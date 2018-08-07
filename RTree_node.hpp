@@ -105,12 +105,13 @@ class RTree_node
     int m;
     int elements;
     bool is_leaf;
+    RTree_node * father;
     std::vector< Poligon * > Poligons;
     std::vector< Poligon * > Region;
 
     std::vector< RTree_node * > children_pointer;
     public:
-    RTree_node(bool leaf, int M_sz):is_leaf(leaf), M(M_sz),elements(0), m((M_sz+1)/2){
+    RTree_node(bool leaf, int M_sz, RTree_node * ft = nullptr):is_leaf(leaf), M(M_sz),elements(0), m((M_sz+1)/2),father(ft){
         if(is_leaf){
             Poligons.resize(M+1);
             Region.resize(M+1); 
@@ -270,9 +271,6 @@ class RTree
     }
     //Cuadratic split of a Leaf!.
     void cuadratic_split(RTree_node * node, RTree_node * parent){
-        //Brother node, also is a leaf node!
-        RTree_node * brother = new RTree_node(true, this->M);
-
         // brother will correspond to the j index
         int i, j;
         node->choose_origin(i,j);
@@ -286,6 +284,10 @@ class RTree
             insert_internal_region(parent, node, node->Region[i]);
             root = parent;
         }
+        //Brother node, also is a leaf node!
+        RTree_node * brother = new RTree_node(true, this->M, parent);
+        node->father = parent;
+
 
         insert_internal_region(parent, brother, node->Region[j]);
         //Be care with the following.
@@ -319,7 +321,7 @@ class RTree
         //Ajustar el arbol(nodo, brother, %padre)
         if(parent->elements > parent->M){
             //PARENT MUST BE KNOWN
-            cuadratic_split(parent,nullptr);
+            cuadratic_split(parent,parent->father);
         }
     }
 
