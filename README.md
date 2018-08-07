@@ -11,7 +11,8 @@
 ### Handle poligons of any amount of vertices.
 At the moment only rectangles are handled, this could be solved with a single vector of points.
 
-
+### k - nearest neighbor
+Nothing of this was done
 ### ------------------------------------------
 
 ## DONE LIST

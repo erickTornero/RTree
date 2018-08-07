@@ -177,13 +177,17 @@ class RTree
     //Mbb must be obtained, however for the moment, sinple rectangles are used, 
     //so the Poligon is the same of its MBB. Another parameter is needed
     //or a struct could be used instead.
-    bool insert_poligon(RTree_node *node, Poligon *pol, Poligon *region){
+    bool insert_poligon(RTree_node *node, RTree_node * fat, Poligon *pol, Poligon *region){
         if(root == nullptr){
             this->root = new RTree_node(true, this->M);
             node = root;
         }
         if(!node->is_leaf){
-
+            //Testing -----
+            //Parent is returned with some warnings 
+            RTree_node * pat;
+            RTree_node * leaf_chose = select_leaf(node, pat, region);
+            insert_poligon(leaf_chose,fat, pol,region);
         }
         //If the node is a leaf.
         else{
@@ -202,7 +206,8 @@ class RTree
                 node->elements++;
                 //Split the leaf into two leafs.
                 //Check the nullptr of the patern
-                cuadratic_split(node, nullptr);
+                cuadratic_split(node, fat);
+                //Setting tree
             }
         }
     }
@@ -214,6 +219,7 @@ class RTree
             node->elements++;
         }
         else{
+            //If internal node is full, then create a patern.
             
         }
     }
@@ -236,25 +242,25 @@ class RTree
             int cost_node = parent->Region[i]->cost_two_poligons(*split_reg[m], p_min, p_max);
             int cost_brother = parent->Region[j]->cost_two_poligons(*split_reg[m], pb_min, pb_max);
             if(cost_node < cost_brother && node->elements <= node->m){
-                insert_poligon(node,split_pol[m],split_reg[m]);
+                insert_poligon(node,parent, split_pol[m],split_reg[m]);
                 parent->Region[i]->Pmin = p_min;
                 parent->Region[i]->Pmax = p_max;
             }
             else if(cost_node > cost_brother && brother->elements <= brother->m){
-                insert_poligon(brother,split_pol[m],split_reg[m]);
+                insert_poligon(brother,parent,split_pol[m],split_reg[m]);
                 parent->Region[j]->Pmin = pb_min;
                 parent->Region[j]->Pmax = pb_max;
             }
             else{
                 //If any of the nodes is full fill, then fill the other
                 if(node->elements < node->m){
-                    insert_poligon(node,split_pol[m],split_reg[m]);
+                    insert_poligon(node,parent,split_pol[m],split_reg[m]);
 
                     parent->Region[i]->Pmin = p_min;
                     parent->Region[i]->Pmax = p_max;
                 }
                 else{
-                    insert_poligon(brother,split_pol[m],split_reg[m]);
+                    insert_poligon(brother,parent,split_pol[m],split_reg[m]);
                     parent->Region[j]->Pmin = pb_min;
                     parent->Region[j]->Pmax = pb_max;
                 }
@@ -297,7 +303,7 @@ class RTree
         Poligon * tmp_p = node->Poligons[i];
         Poligon * tmp_r = node->Region[i];
 
-        insert_poligon(brother,node->Poligons[j],node->Region[j]);
+        insert_poligon(brother,parent, node->Poligons[j],node->Region[j]);
 
         for(int m = 0; m < node->elements; m++){
             node->Poligons[m] = nullptr;
@@ -305,9 +311,51 @@ class RTree
         }
         node->elements = 0;
 
-        insert_poligon(node, tmp_p, tmp_r);
+        insert_poligon(node, parent, tmp_p, tmp_r);
         /////////////////End - Prepare for distribution//////////////////////////////////////
 
         distribute_poligons(parent, brother, node, tmp_pol,tmp_reg);
+
+        //Ajustar el arbol(nodo, brother, %padre)
+        if(parent->elements > parent->M){
+            //PARENT MUST BE KNOWN
+            cuadratic_split(parent,nullptr);
+        }
+    }
+
+    // Select the leaf where the new poligon must be inserted!
+    RTree_node * select_leaf(RTree_node * node, RTree_node *& parent, Poligon * p_region){
+        if(node->is_leaf){
+            return node;
+        }
+        else{
+            int index_min;
+            int min_cost = std::numeric_limits<int>::max();
+            //Garbage points.
+            Point p1, p2;
+            for(int i = 0; i < node->elements; i++){
+                int child_cost = node->Region[i]->cost_two_poligons(*p_region, p1, p2);
+                if(child_cost < min_cost){
+                    min_cost = child_cost;
+                    index_min = i;
+                }
+            }
+            //Warning --> be care: check, may be this kind of implementation is producing problems.
+            // I maens: Pointer by reference. Keep parent as argument of this function.
+            parent = node;
+            return select_leaf(node->children_pointer[index_min],parent,p_region);
+        }
+    }
+
+    //TODO: See for help, this link could be useful: between lines 305 to 332
+    //https://github.com/dhconnelly/rtreego/blob/master/rtree.go
+    void adjust_tree(RTree_node * node, RTree_node * brother, RTree_node * parent){
+        //be care on asignation of root.
+        if(node == root){
+            return;
+        }
+        else{
+            
+        }
     }
 };
