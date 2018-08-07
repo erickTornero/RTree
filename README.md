@@ -11,6 +11,9 @@
 ### Handle poligons of any amount of vertices.
 At the moment only rectangles are handled, this could be solved with a single vector of points.
 
+### FIX, parent argument in a sort of functions.
+It's maybe no longer necessary.
+
 ### k - nearest neighbor
 Nothing of this was done
 ### ------------------------------------------

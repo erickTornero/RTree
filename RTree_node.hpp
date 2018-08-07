@@ -188,7 +188,7 @@ class RTree
             //Parent is returned with some warnings 
             RTree_node * pat;
             RTree_node * leaf_chose = select_leaf(node, pat, region);
-            insert_poligon(leaf_chose,fat, pol,region);
+            insert_poligon(leaf_chose,pat, pol,region);
         }
         //If the node is a leaf.
         else{
@@ -286,8 +286,8 @@ class RTree
         }
         //Brother node, also is a leaf node!
         RTree_node * brother = new RTree_node(true, this->M, parent);
+        //TODO: Incongruence parent!!!
         node->father = parent;
-
 
         insert_internal_region(parent, brother, node->Region[j]);
         //Be care with the following.
