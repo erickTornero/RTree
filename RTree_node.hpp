@@ -201,7 +201,8 @@ class RTree
                 node->Region[node->elements] = region;
                 node->elements++;
                 //Split the leaf into two leafs.
-                cuadratic_split(node);
+                //Check the nullptr of the patern
+                cuadratic_split(node, nullptr);
             }
         }
     }
@@ -262,18 +263,24 @@ class RTree
 
     }
     //Cuadratic split of a Leaf!.
-    void cuadratic_split(RTree_node * node){
+    void cuadratic_split(RTree_node * node, RTree_node * parent){
         //Brother node, also is a leaf node!
         RTree_node * brother = new RTree_node(true, this->M);
+
+        // brother will correspond to the j index
+        int i, j;
+        node->choose_origin(i,j);
         //Parent node, it isn't a leaf node!.
         //TODO: node parent is created, considering that it not exist. When exists is missing
-        RTree_node * parent = new RTree_node(false, this->M);
-        //be care with this.
-        root = parent;
-        int i, j;
-        // brother will correspond to the j index
-        node->choose_origin(i,j);
-        insert_internal_region(parent, node, node->Region[i]);
+        if(parent == nullptr){
+            parent = new RTree_node(false, this->M);
+            //be care with this.
+            //TODO: what's about when parent already exists node should'nt been agregated!.
+            //Ok -- maybe it solves the problem.
+            insert_internal_region(parent, node, node->Region[i]);
+            root = parent;
+        }
+
         insert_internal_region(parent, brother, node->Region[j]);
         //Be care with the following.
         //Clear the node to make the partition using temporal variables.
