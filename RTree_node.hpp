@@ -5,7 +5,7 @@ class Point{
     int X;
     int Y;
     public:
-    Point(int x, int y): X(x), Y(y){};
+    Point(int x = 0, int y = 0): X(x), Y(y){};
     friend class Poligon;
     //A point is equal or less than other if its 'X' value and it 'Y' value
     //are equal or less than the 'X' and 'Y' value of the other Point.
@@ -62,8 +62,7 @@ class Poligon{
         }
         return false;
     }
-    private:
-    int area_added(const Poligon & reg){
+    int area_added(const Poligon & reg, Point & pmin, Point & pmax){
         int x_max = this->Pmax.X;
         if(reg.Pmax.X > x_max){
             x_max = reg.Pmax.X;
@@ -81,11 +80,14 @@ class Poligon{
         if(reg.Pmin.Y < y_min){
             y_min = reg.Pmin.Y;
         }
+        //This points max and minimung will welp to calculate the region of parents
+        pmin = Point(x_min,y_min);
+        pmax = Point(x_max,y_max);
         return (x_max-x_min)*(y_max-y_min);
     }
-    public: 
-    int cost_two_poligons(const Poligon & reg){
-        int d = area_added(reg);
+    int cost_two_poligons(const Poligon & reg, Point & p1, Point & p2){
+        //Point p1 garbage, must be optimized, maybe by a pointer instead reference
+        int d = area_added(reg,p1,p2);
         d -= (reg.Pmax.X - reg.Pmin.X)*(reg.Pmax.Y - reg.Pmin.Y);
         d -= (this->Pmax.X - this->Pmin.X)*(this->Pmax.Y - this->Pmin.Y);
         return d;
@@ -123,12 +125,15 @@ class RTree_node
     void choose_origin(int & a, int & b){
         int i = 0;
         int d = std::numeric_limits<int>::min();
+        Point x,y; //Garbage
         //Cuadratic choose.
         while(i < elements -1){
             for(int j = i+1; j < elements; j++){
-                if(Region[i]->cost_two_poligons(*Region[j]) > d){
+                int costo = Region[i]->cost_two_poligons(*Region[j], x, y);
+                if( costo > d){
                     a = i;
                     b = j;
+                    d = costo;
                 }
             }
             i++;
@@ -211,7 +216,49 @@ class RTree
 
         }
     }
-    void distribute_poligons(RTree_node * from, RTree_node * to, int i, int j){
+    void distribute_poligons(RTree_node * parent, RTree_node * brother, RTree_node * node, std::vector<Poligon * > split_pol, std::vector<Poligon * > split_reg){
+        int i, j;
+        //Choose in which index is the node & the brother
+        for(int a = 0; a < parent->elements; a++){
+            if(parent->children_pointer[a] == node){
+                i = a;
+            }
+            else if(parent->children_pointer[a] == brother){
+                j = a;
+            }
+        }
+        for(int m = 0; m < split_reg.size(); m++){
+            Point p_min(0,0);
+            Point p_max(0,0);
+            Point pb_min(0,0);
+            Point pb_max(0,0);
+            int cost_node = parent->Region[i]->cost_two_poligons(*split_reg[m], p_min, p_max);
+            int cost_brother = parent->Region[j]->cost_two_poligons(*split_reg[m], pb_min, pb_max);
+            if(cost_node < cost_brother && node->elements <= node->m){
+                insert_poligon(node,split_pol[m],split_reg[m]);
+                parent->Region[i]->Pmin = p_min;
+                parent->Region[i]->Pmax = p_max;
+            }
+            else if(cost_node > cost_brother && brother->elements <= brother->m){
+                insert_poligon(brother,split_pol[m],split_reg[m]);
+                parent->Region[j]->Pmin = pb_min;
+                parent->Region[j]->Pmax = pb_max;
+            }
+            else{
+                //If any of the nodes is full fill, then fill the other
+                if(node->elements < node->m){
+                    insert_poligon(node,split_pol[m],split_reg[m]);
+
+                    parent->Region[i]->Pmin = p_min;
+                    parent->Region[i]->Pmax = p_max;
+                }
+                else{
+                    insert_poligon(brother,split_pol[m],split_reg[m]);
+                    parent->Region[j]->Pmin = pb_min;
+                    parent->Region[j]->Pmax = pb_max;
+                }
+            }
+        }
 
     }
     //Cuadratic split of a Leaf!.
@@ -219,14 +266,41 @@ class RTree
         //Brother node, also is a leaf node!
         RTree_node * brother = new RTree_node(true, this->M);
         //Parent node, it isn't a leaf node!.
-        //TODO: node parent is created, considering that it not exist.
+        //TODO: node parent is created, considering that it not exist. When exists is missing
         RTree_node * parent = new RTree_node(false, this->M);
-
+        //be care with this.
+        root = parent;
         int i, j;
         // brother will correspond to the j index
         node->choose_origin(i,j);
         insert_internal_region(parent, node, node->Region[i]);
         insert_internal_region(parent, brother, node->Region[j]);
-        distribute_poligons(node, brother, i, j);
+        //Be care with the following.
+        //Clear the node to make the partition using temporal variables.
+        /////////////////////Prepare for distribution/////////////////////////
+        std::vector<Poligon * > tmp_pol;
+        std::vector<Poligon * > tmp_reg;
+
+        for(int n = 0; n < node->elements; n++){
+            if(n != i && n != j){
+                tmp_pol.push_back(node->Poligons[n]);
+                tmp_reg.push_back(node->Region[n]);
+            }
+        }
+        Poligon * tmp_p = node->Poligons[i];
+        Poligon * tmp_r = node->Region[i];
+
+        insert_poligon(brother,node->Poligons[j],node->Region[j]);
+
+        for(int m = 0; m < node->elements; m++){
+            node->Poligons[m] = nullptr;
+            node->Region[m] = nullptr;
+        }
+        node->elements = 0;
+
+        insert_poligon(node, tmp_p, tmp_r);
+        /////////////////End - Prepare for distribution//////////////////////////////////////
+
+        distribute_poligons(parent, brother, node, tmp_pol,tmp_reg);
     }
 };
