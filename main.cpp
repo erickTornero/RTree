@@ -23,7 +23,7 @@ int main(){
     MyR_tree.insert_poligon(MyR_tree.root, &myPol6, &reg6);
 
     std::vector<Poligon * >  answer;
-    Poligon q(Point(0,0),Point(5,4));
+    Poligon q(Point(0,0),Point(3,3));
     MyR_tree.search(MyR_tree.root,q,answer);
     int xx = 21;
 }

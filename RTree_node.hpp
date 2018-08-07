@@ -214,7 +214,7 @@ class RTree
             node->elements++;
         }
         else{
-
+            
         }
     }
     void distribute_poligons(RTree_node * parent, RTree_node * brother, RTree_node * node, std::vector<Poligon * > split_pol, std::vector<Poligon * > split_reg){
@@ -229,10 +229,10 @@ class RTree
             }
         }
         for(int m = 0; m < split_reg.size(); m++){
-            Point p_min(0,0);
-            Point p_max(0,0);
-            Point pb_min(0,0);
-            Point pb_max(0,0);
+            Point p_min;
+            Point p_max;
+            Point pb_min;
+            Point pb_max;
             int cost_node = parent->Region[i]->cost_two_poligons(*split_reg[m], p_min, p_max);
             int cost_brother = parent->Region[j]->cost_two_poligons(*split_reg[m], pb_min, pb_max);
             if(cost_node < cost_brother && node->elements <= node->m){
