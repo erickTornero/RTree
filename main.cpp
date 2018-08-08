@@ -2,29 +2,29 @@
 #include "RTree_node.hpp"
 
 int main(){
-    Poligon myPol(Point(0,0),Point(2,2));
+    Poligon myPol(Point(1,2),Point(2,4));
     Poligon reg = myPol;
-    Poligon myPol2(Point(3,2),Point(4,3));
+    Poligon myPol2(Point(3,1),Point(5,2));
     Poligon reg2 = myPol2;
-    Poligon myPol3(Point(1,0),Point(2,2));
+    Poligon myPol3(Point(8,8),Point(9,9));
     Poligon reg3 = myPol3;
-    Poligon myPol4(Point(10,10),Point(11,11));
+    Poligon myPol4(Point(5,3),Point(6,4));
     Poligon reg4 = myPol4;
-    Poligon myPol5(Point(5,2),Point(6,3));
+    Poligon myPol5(Point(2,11),Point(3,12));
     Poligon reg5 = myPol5;
-    Poligon myPol6(Point(2,2),Point(3,3));
+    Poligon myPol6(Point(4,12),Point(5,14));
     Poligon reg6= myPol6;
 
-    Poligon myPol7(Point(6,5),Point(7,7));
+    Poligon myPol7(Point(11,12),Point(12,14));
     Poligon reg7= myPol7;
-    Poligon myPol8(Point(3,3),Point(6,6));
+    Poligon myPol8(Point(10,10),Point(13,11));
     Poligon reg8= myPol8;
-    Poligon myPol9(Point(2,0),Point(3,3));
+    Poligon myPol9(Point(1,13),Point(3,15));
     Poligon reg9= myPol9;
-    Poligon myPol10(Point(4,0),Point(5,2));
+    Poligon myPol10(Point(1,6),Point(3,7));
     Poligon reg10= myPol10;
 
-    RTree MyR_tree(4);
+    RTree MyR_tree(3);
     MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol, &reg);
     MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol2, &reg2);
     MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol3, &reg3);

@@ -23,6 +23,8 @@ class Point{
           else
             return false;
     }
+    int get_X(){return this->X;}
+    int get_Y(){return this->Y;}
 };
 //For the moment each poligon will be a single rectangle as well as and each Bounding box too
 //Poligon must be redefined!!. not as Point Max or Point min.
@@ -93,9 +95,6 @@ class Poligon{
         return d;
     }
     //Must be implemented when poligons will be more than single rectangles.
-    static Poligon * get_mbb_single_poligon(const Poligon & pol){
-        
-    }
 
 };
 
@@ -141,7 +140,27 @@ class RTree_node
         }
     }
 
-
+    Poligon  mbb_node(){
+        int x_min = std::numeric_limits<int>::max(); 
+        int x_max = std::numeric_limits<int>::min();
+        int y_min = x_min, y_max = x_max;
+        for( int i = 0; i < this->elements; i++){
+            if(this->Region[i]->Pmin.get_X() < x_min){
+                x_min = this->Region[i]->Pmin.get_X();
+            }
+            if(this->Region[i]->Pmin.get_Y() < y_min){
+                y_min = this->Region[i]->Pmin.get_Y();
+            }
+            
+            if(this->Region[i]->Pmax.get_X() > x_max){
+                x_max = this->Region[i]->Pmax.get_X();
+            }
+            if(this->Region[i]->Pmax.get_Y() > y_max){
+                y_max = this->Region[i]->Pmax.get_Y();
+            }
+        }
+        return Poligon(Point(x_min,y_min),Point(x_max,y_max));
+    }
     friend class RTree;
 };
 
@@ -197,6 +216,15 @@ class RTree
                 node->Poligons[node->elements] = pol;
                 node->Region[node->elements] = region;
                 //TODO: Maybe The MBB of object is missing
+                if(fat != nullptr){
+                    //Update the region of father.
+                    for(int m = 0; m < fat->elements; m++){
+                        if(fat->children_pointer[m] == node){
+                            fat->Region[m]->area_added(*region, fat->Region[m]->Pmin,fat->Region[m]->Pmax);
+                            break;
+                        }
+                    }
+                }
                 node->elements++;
             }
             //If there isn't space on the current Leaf!
@@ -211,6 +239,8 @@ class RTree
                 //Setting tree
             }
         }
+        //if(fat != nullptr)
+            adjust_tree(node, nullptr, fat);
     }
     //Insert elements on internal nodes, its a bit diferent when insert poligons.
     bool insert_internal_region(RTree_node * node, RTree_node * child_node, Poligon * region){
@@ -242,19 +272,19 @@ class RTree
             Point pb_max;
             int cost_node = parent->Region[i]->cost_two_poligons(*split_reg[m], p_min, p_max);
             int cost_brother = parent->Region[j]->cost_two_poligons(*split_reg[m], pb_min, pb_max);
-            if(cost_node < cost_brother && node->elements <= node->m){
+            if(cost_node < cost_brother && node->elements < node->M - node->m + 1){
                 insert_poligon(node,parent, split_pol[m],split_reg[m]);
                 parent->Region[i]->Pmin = p_min;
                 parent->Region[i]->Pmax = p_max;
             }
-            else if(cost_node > cost_brother && brother->elements <= brother->m){
+            else if(cost_node > cost_brother && brother->elements < brother->M - brother->m + 1){
                 insert_poligon(brother,parent,split_pol[m],split_reg[m]);
                 parent->Region[j]->Pmin = pb_min;
                 parent->Region[j]->Pmax = pb_max;
             }
             else{
                 //If any of the nodes is full fill, then fill the other
-                if(node->elements < node->m){
+                if(node->elements < node->M - node->m + 1){
                     insert_poligon(node,parent,split_pol[m],split_reg[m]);
 
                     parent->Region[i]->Pmin = p_min;
@@ -262,6 +292,51 @@ class RTree
                 }
                 else{
                     insert_poligon(brother,parent,split_pol[m],split_reg[m]);
+                    parent->Region[j]->Pmin = pb_min;
+                    parent->Region[j]->Pmax = pb_max;
+                }
+            }
+        }
+    }
+
+    void distribute_poligons(RTree_node * parent, RTree_node * brother, RTree_node * node, std::vector<RTree_node * > split_children, std::vector<Poligon * > split_reg){
+        int i, j;
+        //Choose in which index is the node & the brother
+        for(int a = 0; a < parent->elements; a++){
+            if(parent->children_pointer[a] == node){
+                i = a;
+            }
+            else if(parent->children_pointer[a] == brother){
+                j = a;
+            }
+        }
+        for(int m = 0; m < split_reg.size(); m++){
+            Point p_min;
+            Point p_max;
+            Point pb_min;
+            Point pb_max;
+            int cost_node = parent->Region[i]->cost_two_poligons(*split_reg[m], p_min, p_max);
+            int cost_brother = parent->Region[j]->cost_two_poligons(*split_reg[m], pb_min, pb_max);
+            if(cost_node < cost_brother && node->elements <= node->m){
+                insert_internal_region(node, split_children[m],split_reg[m]);
+                parent->Region[i]->Pmin = p_min;
+                parent->Region[i]->Pmax = p_max;
+            }
+            else if(cost_node > cost_brother && brother->elements <= brother->m){
+                insert_internal_region(brother, split_children[m],split_reg[m]);
+                parent->Region[j]->Pmin = pb_min;
+                parent->Region[j]->Pmax = pb_max;
+            }
+            else{
+                //If any of the nodes is full fill, then fill the other
+                if(node->elements < node->m){
+                    insert_internal_region(node, split_children[m],split_reg[m]);
+
+                    parent->Region[i]->Pmin = p_min;
+                    parent->Region[i]->Pmax = p_max;
+                }
+                else{
+                    insert_internal_region(brother , split_children[m],split_reg[m]);
                     parent->Region[j]->Pmin = pb_min;
                     parent->Region[j]->Pmax = pb_max;
                 }
@@ -314,6 +389,16 @@ class RTree
         node->elements = 0;
 
         insert_poligon(node, parent, tmp_p, tmp_r);
+        if(parent != nullptr){
+            for(int m = 0; m < parent->elements; m++){
+                if(parent->children_pointer[m] == node){
+                    parent->Region[m]->Pmin = tmp_r->Pmin;
+                    parent->Region[m]->Pmax = tmp_r->Pmax;
+                    break;
+                }
+            }
+        }
+        
         /////////////////End - Prepare for distribution//////////////////////////////////////
 
         distribute_poligons(parent, brother, node, tmp_pol,tmp_reg);
@@ -321,10 +406,63 @@ class RTree
         //Ajustar el arbol(nodo, brother, %padre)
         if(parent->elements > parent->M){
             //PARENT MUST BE KNOWN
-            cuadratic_split(parent,parent->father);
+            cuadratic_split_internal_nodes(parent,parent->father);
         }
     }
 
+    void cuadratic_split_internal_nodes(RTree_node * node, RTree_node * parent){
+        int i, j;
+        node->choose_origin(i,j);
+        //Parent node, it isn't a leaf node!.
+        //TODO: node parent is created, considering that it not exist. When exists is missing
+        if(parent == nullptr){
+            parent = new RTree_node(false, this->M);
+            //be care with this.
+            //TODO: what's about when parent already exists node should'nt been agregated!.
+            //Ok -- maybe it solves the problem.
+            insert_internal_region(parent, node, node->Region[i]);
+            root = parent;
+        }
+        //Brother node, also is a leaf node!
+        RTree_node * brother = new RTree_node(false, this->M, parent);
+        //TODO: Incongruence parent!!!
+        node->father = parent;
+
+        insert_internal_region(parent, brother, node->Region[j]);
+        //Be care with the following.
+        //Clear the node to make the partition using temporal variables.
+        /////////////////////Prepare for distribution/////////////////////////
+        std::vector<RTree_node * > childs;
+        std::vector<Poligon * > tmp_reg;
+
+        for(int n = 0; n < node->elements; n++){
+            if(n != i && n != j){
+                childs.push_back(node->children_pointer[n]);
+                tmp_reg.push_back(node->Region[n]);
+            }
+        }
+        RTree_node * tmp_int_child = node->children_pointer[i];
+        Poligon * tmp_r = node->Region[i];
+
+        insert_internal_region(brother,node->children_pointer[j],node->Region[j]);
+
+        for(int m = 0; m < node->elements; m++){
+            node->children_pointer[m] = nullptr;
+            node->Region[m] = nullptr;
+        }
+        node->elements = 0;
+
+        insert_internal_region(node,  tmp_int_child, tmp_r);
+        /////////////////End - Prepare for distribution//////////////////////////////////////
+
+        distribute_poligons(parent, brother, node, childs,tmp_reg);
+
+        //Ajustar el arbol(nodo, brother, %padre)
+        if(parent->elements > parent->M){
+            //PARENT MUST BE KNOWN
+            cuadratic_split_internal_nodes(parent,parent->father);
+        }
+    }
     // Select the leaf where the new poligon must be inserted!
     RTree_node * select_leaf(RTree_node * node, RTree_node *& parent, Poligon * p_region){
         if(node->is_leaf){
@@ -357,7 +495,24 @@ class RTree
             return;
         }
         else{
-            
+            int mm = 0;
+            if(node->father != nullptr){
+                    //Update the region of father.
+                    for(int m = 0; m < node->father->elements; m++){
+                        if(node->father->children_pointer[m] == node){
+                            *node->father->Region[m] = node->mbb_node(); 
+                            mm = m;
+                        }
+                    }
+                    if(brother!= nullptr){
+                        for(int m = 0; m < brother->father->elements; m++){
+                            if(brother->father->children_pointer[m] == brother){
+                                *brother->father->Region[m] = brother->mbb_node(); 
+                            }
+                        }
+                    }
+            }
+            adjust_tree(node->father, nullptr, node->father->father);
         }
     }
 };
