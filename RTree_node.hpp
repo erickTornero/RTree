@@ -274,7 +274,7 @@ class RTree
             int cost_node = parent->Region[i]->cost_two_poligons(*split_reg[m], p_min, p_max);
             int cost_brother = parent->Region[j]->cost_two_poligons(*split_reg[m], pb_min, pb_max);
             if(cost_node < cost_brother && node->elements < node->M - node->m + 1){
-                insert_poligon(node,parent, split_pol[m],split_reg[m]);
+                insert_poligon(node,parent, split_pol[m],split_reg[m]);//PMIN,PMAX INNECESARIO
                 parent->Region[i]->Pmin = p_min;
                 parent->Region[i]->Pmax = p_max;
             }
@@ -456,7 +456,15 @@ class RTree
 
         insert_internal_region(node,  tmp_int_child, tmp_r);
         /////////////////End - Prepare for distribution//////////////////////////////////////
-
+        if(parent != nullptr){
+            for(int m = 0; m < parent->elements; m++){
+                if(parent->children_pointer[m] == node){
+                    parent->Region[m]->Pmin = tmp_r->Pmin;
+                    parent->Region[m]->Pmax = tmp_r->Pmax;
+                    break;
+                }
+            }
+        }
         distribute_poligons(parent, brother, node, childs,tmp_reg);
 
         //Ajustar el arbol(nodo, brother, %padre)
@@ -515,6 +523,42 @@ class RTree
                     }
             }
             adjust_tree(parent, nullptr, parent->father);
+        }
+    }
+
+    void show_values()
+    {
+        showAll_values(this->root);
+    }
+
+    void showAll_values(RTree_node *father)
+    {
+        //NodeLEG<RNode<T>*> *child= father->childs.getFirstNodeLEG();
+
+        if(!father->is_leaf)
+        {
+            for(int i=0; i<father->elements; i++)
+            {
+                std::cout << "REGION" << std::endl;
+                std::cout <<"("<< father->Region[i]->Pmin.get_X() <<", ";
+                std::cout << father->Region[i]->Pmin.get_Y() <<") - ";
+                std::cout <<  "(" << father->Region[i]->Pmax.get_X() <<", ";
+                std::cout << father->Region[i]->Pmax.get_Y() <<")"<< std::endl;
+
+                showAll_values(father->children_pointer[i]);
+
+            }
+        }
+        else
+        {
+            std::cout << "ELEMENTS" << std::endl;
+            for(int i=0; i<father->elements; i++)
+            {
+                std::cout <<"("<< father->Poligons[i]->Pmin.get_X() <<", ";
+                std::cout << father->Poligons[i]->Pmin.get_Y() <<") - ";
+                std::cout << "(" << father->Poligons[i]->Pmax.get_X() <<", ";
+                std::cout << father->Poligons[i]->Pmax.get_Y() <<")"<< std::endl;
+            }
         }
     }
 };

@@ -25,6 +25,10 @@ int main(){
     Poligon reg10= myPol10;
     Poligon myPol11(Point(6, 15),Point(7, 16));
     Poligon reg11= myPol11;
+    Poligon myPol12(Point(14,13),Point(16,14));
+    Poligon reg12= myPol12;
+    Poligon myPol13(Point(12, 15),Point(13, 16));
+    Poligon reg13= myPol13;
     
     RTree MyR_tree(3);
     MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol, &reg);
@@ -38,9 +42,12 @@ int main(){
     MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol9, &reg9);
     MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol10, &reg10);
     MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol11, &reg11);
+    MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol12, &reg12);
+    MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol13, &reg13);
 
     std::vector<Poligon * >  answer;
     Poligon q(Point(0,0),Point(3,3));
     MyR_tree.search(MyR_tree.root,q,answer);
+    MyR_tree.show_values();
     int xx = 21;
 }
