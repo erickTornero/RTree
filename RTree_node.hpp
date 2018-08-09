@@ -226,6 +226,7 @@ class RTree
                     }
                 }
                 node->elements++;
+                adjust_tree(node, nullptr, fat);
             }
             //If there isn't space on the current Leaf!
             else{
@@ -240,7 +241,7 @@ class RTree
             }
         }
         //if(fat != nullptr)
-            adjust_tree(node, nullptr, fat);
+        //adjust_tree(node, nullptr, fat);
     }
     //Insert elements on internal nodes, its a bit diferent when insert poligons.
     bool insert_internal_region(RTree_node * node, RTree_node * child_node, Poligon * region){
@@ -389,6 +390,7 @@ class RTree
         node->elements = 0;
 
         insert_poligon(node, parent, tmp_p, tmp_r);
+        // 
         if(parent != nullptr){
             for(int m = 0; m < parent->elements; m++){
                 if(parent->children_pointer[m] == node){
@@ -496,23 +498,23 @@ class RTree
         }
         else{
             int mm = 0;
-            if(node->father != nullptr){
+            if(parent != nullptr){
                     //Update the region of father.
-                    for(int m = 0; m < node->father->elements; m++){
-                        if(node->father->children_pointer[m] == node){
-                            *node->father->Region[m] = node->mbb_node(); 
+                    for(int m = 0; m < parent->elements; m++){
+                        if(parent->children_pointer[m] == node){
+                            *parent->Region[m] = node->mbb_node(); 
                             mm = m;
                         }
                     }
                     if(brother!= nullptr){
                         for(int m = 0; m < brother->father->elements; m++){
-                            if(brother->father->children_pointer[m] == brother){
-                                *brother->father->Region[m] = brother->mbb_node(); 
+                            if(parent->children_pointer[m] == brother){
+                                *parent->Region[m] = brother->mbb_node(); 
                             }
                         }
                     }
             }
-            adjust_tree(node->father, nullptr, node->father->father);
+            adjust_tree(parent, nullptr, parent->father);
         }
     }
 };
