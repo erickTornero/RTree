@@ -43,4 +43,6 @@ int main(){
     Poligon q(Point(0,0),Point(3,3));
     MyR_tree.search(MyR_tree.root,q,answer);
     int xx = 21;
+
+    MyR_tree.show_values();
 }

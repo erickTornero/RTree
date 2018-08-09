@@ -517,4 +517,40 @@ class RTree
             adjust_tree(parent, nullptr, parent->father);
         }
     }
+
+    void show_values()
+    {
+        showAll_values(this->root);
+    }
+
+    void showAll_values(RTree_node *father)
+    {
+        //NodeLEG<RNode<T>*> *child= father->childs.getFirstNodeLEG();
+
+        if(!father->is_leaf)
+        {
+            for(int i=0; i<father->elements; i++)
+            {
+                std::cout << "REGION" << std::endl;
+                std::cout << father->Region[i]->Pmin.get_X() <<"-";
+                std::cout << father->Region[i]->Pmin.get_Y() <<" ; ";
+                std::cout << father->Region[i]->Pmax.get_X() <<"-";
+                std::cout << father->Region[i]->Pmax.get_Y() << std::endl;
+
+                showAll_values(father->children_pointer[i]);
+
+            }
+        }
+        else
+        {
+            std::cout << "ELEMENTS" << std::endl;
+            for(int i=0; i<father->elements; i++)
+            {
+                std::cout << father->Poligons[i]->Pmin.get_X() <<"-";
+                std::cout << father->Poligons[i]->Pmin.get_Y() <<" ; ";
+                std::cout << father->Poligons[i]->Pmax.get_X() <<"-";
+                std::cout << father->Poligons[i]->Pmax.get_Y() << std::endl;
+            }
+        }
+    }
 };
