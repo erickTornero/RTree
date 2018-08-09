@@ -94,6 +94,13 @@ class Poligon{
         d -= (this->Pmax.X - this->Pmin.X)*(this->Pmax.Y - this->Pmin.Y);
         return d;
     }
+    //debe ser corregido con poligonos distintos a rectangulos
+    void print_poligon(){
+        std::cout <<"("<< this->Pmin.X <<", ";
+        std::cout << this->Pmin.Y <<") - ";
+        std::cout << "(" << this->Pmax.X <<", ";
+        std::cout << this->Pmax.Y <<")"<< std::endl;
+    }
     //Must be implemented when poligons will be more than single rectangles.
 
 };
