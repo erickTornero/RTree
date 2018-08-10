@@ -49,11 +49,17 @@ class Polygon{
     //Colection of Points that represent all vertices
     std::vector<Point> vertices;
     void set_mbb();
+    void area_added(Polygon &, Point & , Point & );
+    
     public:
     //Initialize the Vertices of Polygon
     Polygon(std::vector<Point> p, int k):vertices(p), key(k){set_mbb();}
     //It represent a rectangle region.
     Polygon(Point pmin, Point pmax):Pmin(pmin),Pmax(pmax){};
 
+    //Cost of add a polygon.
+    int cost_two_poligons(Polygon & );
+    Point get_Pmax(){return Pmax;}
+    Point get_Pmin(){return Pmin;}
 };
 #endif

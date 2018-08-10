@@ -2,7 +2,7 @@
 #define __RTREE
 
 #include "Objects.hpp"
-
+#include <limits>
 struct d_leaf{
     public: 
     Polygon * polygon;
@@ -18,7 +18,8 @@ struct d_internal_node{
     void set_data(Polygon * r, RTree_node * c){region = r; child = c;}
 };
 class RTree_node{
-    private: 
+    private:
+    int M;
     int elements;
     bool is_leaf;
     RTree_node * father;
@@ -26,25 +27,27 @@ class RTree_node{
     std::vector<d_internal_node> data_internal_node;
 
     //choose the first nodes in cuadratic split
-    void choose_origin(int & , int &);
+    void choose_origin(int & , int & );
     //Get the MBB of the node.
-    Polygon mbb_node();
+    Polygon mbb_node(const std::vector<Polygon *> & );
     public:
-    RTree_node(bool _l, RTree_node * f = nullptr):is_leaf(_l), elements(0), father(f){};
+    RTree_node(bool _l, int _M, RTree_node * f = nullptr):is_leaf(_l), M(_M), elements(0), father(f){};
+    friend class RTree;
 };
 
 class RTree{
     private:
     RTree_node * root;
     int M;
+    int m;
     //Insert Polygon internaly
-    bool insert_polygon(RTree_node *, Polygon *, Polygon *);
+    bool insert_polygon(RTree_node *, d_leaf);
     //Insert element in an internal node.
-    bool insert_internal_region(RTree_node *, d_internal_node data );
+    bool insert_internal_region(RTree_node *, d_internal_node  );
     //Distribute polygons on leaf:
-    void distribute_polygons(RTree_node * , RTree_node * , d_leaf);
+    void distribute_polygons(RTree_node * , RTree_node * , const std::vector<d_leaf> &);
     //Distribute regions on internal nodes:
-    void distribute_regions(RTree_node *, RTree_node *, d_internal_node);
+    void distribute_regions(RTree_node *, RTree_node *, std::vector<d_internal_node>);
     //Cuadratic split on leafs:
     void cuadratic_split(RTree_node *);
     //Cuadratic split on internal nodes:
@@ -55,7 +58,7 @@ class RTree{
     void adjust_tree(RTree_node * );
 
     public:
-    RTree(int _M): M(_M), root(nullptr){};
+    RTree(int _M): M(_M), m((_M+1)/2),root(nullptr){};
     void range_search(RTree_node * , const Polygon & , std::vector<Polygon *> &);
     //Insert Polygon in Front-end
     bool insert_polygon(Polygon * , Polygon *);
