@@ -607,12 +607,12 @@ class RTree
         Cap. 4, section 4.2, Pàg. 519-520
     */
     void k_nearest_DF(Point q, int k, RTree_node * node, std::queue<Poligon *> & L){
-        int dk = std::numeric_limits<int>::max();
+        float dk = std::numeric_limits<float>::max();
         DFT_recursive(q,k,node,L, dk);
     }
-    void DFT_recursive(Point q, int k, RTree_node * node, std::queue<Poligon *> & L, int & ddk){
+    void DFT_recursive(Point q, int k, RTree_node * node, std::queue<Poligon *> & L, float & ddk){
         if(node->is_leaf){
-            std::vector<int> Dk(node->elements,std::numeric_limits<int>::max());
+            std::vector<float> Dk(node->elements,std::numeric_limits<float>::max());
             std::vector<Poligon *> poligons_tt(node->elements);
             for(int i = 0; i < node->elements; i++){
                 Dk[i] = node->Region[i]->distance_geometric<float>(q);
@@ -624,7 +624,7 @@ class RTree
             }
         }
         else{
-            std::vector<int> Dk(node->elements,std::numeric_limits<int>::max());
+            std::vector<float> Dk(node->elements,std::numeric_limits<float>::max());
             std::vector<RTree_node *> childs_ordered(node->elements);
             for(int i = 0; i < node->elements; i++){
                 Dk[i] = node->Region[i]->distance_geometric<float>(q);
@@ -636,7 +636,7 @@ class RTree
             }
         }
     }
-    void insert_L(Poligon * p, Point q, int d, int k, std::queue<Poligon*> &L, int & ddk){
+    void insert_L(Poligon * p, Point q, int d, int k, std::queue<Poligon*> &L, float & ddk){
         if(L.size() == k){
             L.pop();
         }
@@ -646,12 +646,12 @@ class RTree
         }
     }
     template <class T>
-    void insert_sort(std::vector<int> & D, std::vector<T*> & childs){
+    void insert_sort(std::vector<float> & D, std::vector<T*> & childs){
         int initial = 0;
-        std::vector<int> dtmp = D;
+        std::vector<float> dtmp = D;
         std::vector<T*>  chld = childs;
         for(int i = 0;i < dtmp.size();i++){
-            int cur_value = dtmp[i];
+            float cur_value = dtmp[i];
             T * cur_child = chld[i];
             int j = i -1;
             while(j>=0 && dtmp[j] > cur_value){

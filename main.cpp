@@ -56,9 +56,9 @@ int main(){
     MyR_tree.insert_poligon(MyR_tree.root, nullptr, &myPol16, &reg16);
 
     std::queue<Poligon *> ans;
-    MyR_tree.k_nearest_DF(Point(0,0),16,MyR_tree.root,ans);
+    MyR_tree.k_nearest_DF(Point(10,9),3,MyR_tree.root,ans);
     std::vector<Poligon * >  answer;
-    Poligon q(Point(8,8),Point(13,11));
+    Poligon q(Point(3,1),Point(6,4));
     MyR_tree.search(MyR_tree.root,q,answer);
     MyR_tree.show_values();
     std::cout<<"Values found: "<<std::endl;
