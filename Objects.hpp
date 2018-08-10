@@ -1,5 +1,7 @@
 #ifndef __OBJECTS
 #define __OBJECTS
+
+#include <vector>
 class Point{
     private:
     //2D - Coordinates of Point.  
@@ -7,6 +9,8 @@ class Point{
     int Y;
 
     public:
+    //Define a constructor.
+    Point(int x = 0, int y = 0): X(x), Y(y){};
     //Overload of operators:
     //A point is equal or less than other if its 'X' value and it 'Y' value
     //are equal or less than the 'X' and 'Y' value of the other Point.
@@ -33,5 +37,21 @@ class Point{
         this->X = x;
         this->Y = y;
     }
+};
+
+class Polygon{
+    private: 
+    //MBB of the Polygon is represented 
+    //by its minimum Point & maximun Point
+    Point Pmin;
+    Point Pmax;
+    //Colection of Points that represent all vertices
+    std::vector<Point> vertices;
+    public:
+    //Initialize the Vertices of Polygon
+    Polygon(std::vector<Point> p):vertices(p){};
+    //It represent a rectangle region.
+    Polygon(Point pmin, Point pmax):Pmin(pmin),Pmax(pmax){};
+
 };
 #endif
