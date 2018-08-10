@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <math.h>
+#include <queue>
+
 class Point{
     int X;
     int Y;
@@ -29,9 +32,10 @@ class Point{
 //For the moment each poligon will be a single rectangle as well as and each Bounding box too
 //Poligon must be redefined!!. not as Point Max or Point min.
 class Poligon{
+    public:
     Point Pmin;
     Point Pmax;
-    public:
+    
     //TODO: When a poligon is created, automaticaly Pmin, and Pmax must be calculated.
     // ... then the region can be returned easily
     Poligon(Point min, Point max):Pmin(min), Pmax(max){};
@@ -101,8 +105,37 @@ class Poligon{
         std::cout << "(" << this->Pmax.X <<", ";
         std::cout << this->Pmax.Y <<")"<< std::endl;
     }
+    template <class T>
+    T distance_geometric(Point q){
+        T d_X_min = std::numeric_limits<T>::max();
+        if(q.get_X() >= Pmin.get_X() && q.get_X() <= Pmax.get_X()){
+            d_X_min = 0;
+        }
+        else{
+            if(std::abs(q.get_X() - Pmin.get_X()) < d_X_min){
+                d_X_min = std::abs(q.get_X() - Pmin.get_X());
+            }
+            if(std::abs(q.get_X() - Pmax.get_X()) < d_X_min){
+                d_X_min = std::abs(q.get_X() - Pmin.get_X());
+            }
+        }
+        T d_Y_min = std::numeric_limits<T>::max();
+        if(q.get_Y() >= Pmin.get_Y() && q.get_Y() <= Pmax.get_Y()){
+            d_Y_min = 0;
+        }
+        else{
+            if(std::abs(q.get_Y() - Pmin.get_Y()) < d_Y_min){
+                d_Y_min = std::abs(q.get_Y() - Pmin.get_Y());
+            }
+            if(std::abs(q.get_Y() - Pmax.get_Y()) < d_Y_min){
+                d_Y_min = std::abs(q.get_Y() - Pmin.get_Y());
+            }
+        }
+        T d = std::sqrt(d_X_min*d_X_min + d_Y_min*d_Y_min);
+        return d;
+    }
     //Must be implemented when poligons will be more than single rectangles.
-
+    
 };
 
 class RTree_node
@@ -566,6 +599,72 @@ class RTree
                 std::cout << "(" << father->Poligons[i]->Pmax.get_X() <<", ";
                 std::cout << father->Poligons[i]->Pmax.get_Y() <<")"<< std::endl;
             }
+        }
+    }
+
+    /*
+        K-neares neighbor based on Book Fundation of multidimensional and metric data structure.
+        Cap. 4, section 4.2, Pàg. 519-520
+    */
+    void k_nearest_DF(Point q, int k, RTree_node * node, std::queue<Poligon *> & L){
+        int dk = std::numeric_limits<int>::max();
+        DFT_recursive(q,k,node,L, dk);
+    }
+    void DFT_recursive(Point q, int k, RTree_node * node, std::queue<Poligon *> & L, int & ddk){
+        if(node->is_leaf){
+            std::vector<int> Dk(node->elements,std::numeric_limits<int>::max());
+            std::vector<Poligon *> poligons_tt(node->elements);
+            for(int i = 0; i < node->elements; i++){
+                Dk[i] = node->Region[i]->distance_geometric<float>(q);
+                poligons_tt[i] = node->Poligons[i];
+            }
+            insert_sort(Dk,poligons_tt);
+            for(int i = 0; i < Dk.size(); i++){
+                insert_L(poligons_tt[i], q, Dk[i], k, L, ddk);
+            }
+        }
+        else{
+            std::vector<int> Dk(node->elements,std::numeric_limits<int>::max());
+            std::vector<RTree_node *> childs_ordered(node->elements);
+            for(int i = 0; i < node->elements; i++){
+                Dk[i] = node->Region[i]->distance_geometric<float>(q);
+                childs_ordered[i] = node->children_pointer[i];
+            }
+            insert_sort(Dk,childs_ordered);
+            for(int i = 0; i < Dk.size(); i++){
+                DFT_recursive(q,k,childs_ordered[i],L, ddk);
+            }
+        }
+    }
+    void insert_L(Poligon * p, Point q, int d, int k, std::queue<Poligon*> &L, int & ddk){
+        if(L.size() == k){
+            L.pop();
+        }
+        L.push(p);
+        if(L.size() == k){
+            ddk = L.front()->distance_geometric<float>(q);
+        }
+    }
+    template <class T>
+    void insert_sort(std::vector<int> & D, std::vector<T*> & childs){
+        int initial = 0;
+        std::vector<int> dtmp = D;
+        std::vector<T*>  chld = childs;
+        for(int i = 0;i < dtmp.size();i++){
+            int cur_value = dtmp[i];
+            T * cur_child = chld[i];
+            int j = i -1;
+            while(j>=0 && dtmp[j] > cur_value){
+                dtmp[j+1]= dtmp[j];
+                chld[j+1] = chld[j];
+                j--;
+            }
+            dtmp[j+1] = cur_value;
+            chld[j+1] = cur_child;
+        }
+        for(int i = 0; i < D.size();i++){
+            D[i] = dtmp[D.size()-i-1];
+            childs[i] = chld[childs.size()-i-1];
         }
     }
 };
