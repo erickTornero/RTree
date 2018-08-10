@@ -29,7 +29,7 @@ class RTree_node{
     //choose the first nodes in cuadratic split
     void choose_origin(int & , int & );
     //Get the MBB of the node.
-    Polygon mbb_node(const std::vector<Polygon *> & );
+    Polygon mbb_node();
     public:
     RTree_node(bool _l, int _M, RTree_node * f = nullptr):is_leaf(_l), M(_M), elements(0), father(f){};
     friend class RTree;
@@ -47,15 +47,15 @@ class RTree{
     //Distribute polygons on leaf:
     void distribute_polygons(RTree_node * , RTree_node * , const std::vector<d_leaf> &);
     //Distribute regions on internal nodes:
-    void distribute_regions(RTree_node *, RTree_node *, std::vector<d_internal_node>);
+    void distribute_regions(RTree_node *, RTree_node *, const std::vector<d_internal_node> &);
     //Cuadratic split on leafs:
-    void cuadratic_split(RTree_node *);
+    RTree_node * cuadratic_split(RTree_node *);
     //Cuadratic split on internal nodes:
-    void cuadratic_split_internal_nodes(RTree_node *);
+    RTree_node *  cuadratic_split_internal_nodes(RTree_node *);
     //Select the leaf where the new Polygon try to be inserted
     RTree_node * select_leaf(RTree_node * node, Polygon * );
     //Adjust the tree after of insert a polygon
-    void adjust_tree(RTree_node * );
+    void adjust_tree(RTree_node *, RTree_node * );
 
     public:
     RTree(int _M): M(_M), m((_M+1)/2),root(nullptr){};
