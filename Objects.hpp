@@ -45,11 +45,13 @@ class Polygon{
     //by its minimum Point & maximun Point
     Point Pmin;
     Point Pmax;
+    int key;
     //Colection of Points that represent all vertices
     std::vector<Point> vertices;
+    void set_mbb();
     public:
     //Initialize the Vertices of Polygon
-    Polygon(std::vector<Point> p):vertices(p){};
+    Polygon(std::vector<Point> p, int k):vertices(p), key(k){set_mbb();}
     //It represent a rectangle region.
     Polygon(Point pmin, Point pmax):Pmin(pmin),Pmax(pmax){};
 
