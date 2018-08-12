@@ -99,7 +99,6 @@ bool RTree::insert(RTree_node *& node, d_leaf data){
     RTree_node * leaf_chose = nullptr;
     if(root == nullptr){
         this->root = new RTree_node(true, this->M);
-        this->H++;
     }
     leaf_chose = select_leaf(this->root, data.region);
     posible_Brother = insert_polygon(leaf_chose, data);
@@ -109,6 +108,7 @@ bool RTree::insert(RTree_node *& node, d_leaf data){
         RTree_node * node = this->root; 
         internal_brother = cuadratic_split_internal_nodes(this->root);
         adjust_tree(node, internal_brother);
+        this->H++;
     }
 }
 bool RTree::insert_internal(RTree_node * node, d_internal_node data){
@@ -123,6 +123,7 @@ RTree_node * RTree::cuadratic_split(RTree_node * node){
         //Just insert elements.
         insert_internal_region(node->father, d_internal_node(node->data_leafs[i].region, node));
         this->root = node->father;
+        this->H++;
     }
     else{
         //father region must be equal to the node region 'i'
@@ -259,38 +260,27 @@ void RTree::distribute_regions(RTree_node * node, RTree_node *brother, const std
     }
 }
 void RTree::adjust_tree(RTree_node * node, RTree_node *brother){
-    //if(node == this->root){
-    //    return;
-    //}
-    //else{
-        if(node->father != nullptr){
-            for(int m = 0; m < node->father->elements; m++){
-                if(node->father->data_internal_node[m].child == node){
-                    *node->father->data_internal_node[m].region = node->mbb_node();
-                }
-                else if(node->father->data_internal_node[m].child == brother){
-                    *brother->father->data_internal_node[m].region = brother->mbb_node();
-                }
+ 
+    if(node->father != nullptr){
+        for(int m = 0; m < node->father->elements; m++){
+            if(node->father->data_internal_node[m].child == node){
+                *node->father->data_internal_node[m].region = node->mbb_node();
             }
-            /*if(node->father != nullptr)
-                adjust_tree(node->father,nullptr);
-            if(node->elements > this->M && !node->is_leaf){
-                RTree_node * internal_brother = nullptr;
-                internal_brother = cuadratic_split_internal_nodes(node);
-                adjust_tree(node, brother);
-            }*/
-            
-            if(node->elements > this->M && !node->is_leaf){
-                
-                RTree_node * internal_brother = nullptr;
-                internal_brother = cuadratic_split_internal_nodes(node);
-                adjust_tree(node, internal_brother);
+            else if(node->father->data_internal_node[m].child == brother){
+                *brother->father->data_internal_node[m].region = brother->mbb_node();
             }
-            else{
-                adjust_tree(node->father,nullptr);   
-            }
-            
         }
+        if(node->elements > this->M && !node->is_leaf){
+                
+            RTree_node * internal_brother = nullptr;
+            internal_brother = cuadratic_split_internal_nodes(node);
+            adjust_tree(node, internal_brother);
+        }
+        else{
+            adjust_tree(node->father,nullptr);   
+        }
+            
+    }
         
     //}
 }
