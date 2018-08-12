@@ -32,8 +32,8 @@ class Point{
     int get_X(){return this->X;}
     int get_Y(){return this->Y;}
     void set_X(int x){this->X = x;}
-    void set_X(int y){this->Y = y;}
-    void set_X(int x, int y){
+    void set_Y(int y){this->Y = y;}
+    void set_X_Y(int x, int y){
         this->X = x;
         this->Y = y;
     }

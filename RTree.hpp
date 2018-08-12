@@ -10,13 +10,7 @@ struct d_leaf{
     d_leaf(Polygon *p = nullptr, Polygon * r = nullptr):polygon(p),region(r){};
     void set_data(Polygon * p , Polygon * r ){polygon = p; region = r;}
 };
-struct d_internal_node{
-    public:
-    Polygon * region;
-    RTree_node * child;
-    d_internal_node(Polygon *r = nullptr, RTree_node * c = nullptr):region(r),child(c){};
-    void set_data(Polygon * r, RTree_node * c){region = r; child = c;}
-};
+struct d_internal_node;
 class RTree_node{
     private:
     int M;
@@ -31,8 +25,15 @@ class RTree_node{
     //Get the MBB of the node.
     Polygon mbb_node();
     public:
-    RTree_node(bool _l, int _M, RTree_node * f = nullptr):is_leaf(_l), M(_M), elements(0), father(f){};
+    RTree_node(bool _l, int _M, RTree_node * f);
     friend class RTree;
+};
+struct d_internal_node{
+    public:
+    Polygon * region;
+    RTree_node * child;
+    d_internal_node(Polygon *r = nullptr, RTree_node * c = nullptr):region(r),child(c){};
+    void set_data(Polygon * r, RTree_node * c){region = r; child = c;}
 };
 
 class RTree{
@@ -40,10 +41,15 @@ class RTree{
     RTree_node * root;
     int M;
     int m;
+    int H; //Height of tree
     //Insert Polygon internaly
-    bool insert_polygon(RTree_node *, d_leaf);
+    RTree_node * insert_polygon(RTree_node *, d_leaf);
+    //general function to insert
+    bool insert(RTree_node *&, d_leaf);
     //Insert element in an internal node.
     bool insert_internal_region(RTree_node *, d_internal_node  );
+    //General function to insert within internal nodes
+    bool insert_internal(RTree_node *, d_internal_node);
     //Distribute polygons on leaf:
     void distribute_polygons(RTree_node * , RTree_node * , const std::vector<d_leaf> &);
     //Distribute regions on internal nodes:
@@ -58,10 +64,11 @@ class RTree{
     void adjust_tree(RTree_node *, RTree_node * );
 
     public:
-    RTree(int _M): M(_M), m((_M+1)/2),root(nullptr){};
+    RTree(int _M): M(_M), m((_M+1)/2),root(nullptr), H(0){};
     void range_search(RTree_node * , const Polygon & , std::vector<Polygon *> &);
     //Insert Polygon in Front-end
     bool insert_polygon(Polygon * , Polygon *);
+
     //get the k-nearest neighbor Polygons.
     void k_NN_DF(Point q, int k, RTree_node *);
 };
