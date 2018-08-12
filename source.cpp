@@ -3,13 +3,15 @@
 
 
 int main(){
-    Point aa[] = {Point(1,13),Point(3,13),Point(2,15)};
+    //Creation of basic Polygon through a vector of Points.
     std::vector<Point> a{Point(1,13),Point(3,13),Point(2,15)};
     Polygon myReal_poligon(a, 1);
+    //MBB of the Polygon
     Polygon reg_real = Polygon(myReal_poligon.get_Pmin(), myReal_poligon.get_Pmax());
+    //Creation of a Point.
     Polygon pol_point(Point(7,7), 1);
     Polygon point_reg(pol_point.get_Pmin(),pol_point.get_Pmax());
-    
+    //Creation of rectangle polygons
     Polygon myPol(Point(1,2),Point(2,4));
     Polygon reg = myPol;
     Polygon myPol2(Point(3,1),Point(5,2));
@@ -74,8 +76,11 @@ int main(){
     MyR_tree.insert_polygon(&myPol7,&reg7);
     MyR_tree.insert_polygon(&myPol8, &reg8);
     //MyR_tree.insert_polygon(&myPol9, &reg9);
+    //Insertion of a triangle
     MyR_tree.insert_polygon(&myReal_poligon, &reg_real);
+    //Insertion of a point
     MyR_tree.insert_polygon(&pol_point,&point_reg);
+    //Insertion of single rectangle polygons.
     MyR_tree.insert_polygon(&myPol10, &reg10);
     MyR_tree.insert_polygon(&myPol11,&reg11);
     MyR_tree.insert_polygon(&myPol12, &reg12);
