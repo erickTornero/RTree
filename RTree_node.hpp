@@ -4,6 +4,7 @@
 #include <math.h>
 #include <queue>
 
+//WARNING!!!: OBSOLETE FILE!!!!
 class Point{
     int X;
     int Y;

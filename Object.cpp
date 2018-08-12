@@ -29,3 +29,30 @@ int Polygon::cost_two_poligons(Polygon & reg){
     d -= (this->Pmax.get_X() - this->Pmin.get_X())*(this->Pmax.get_Y() - this->Pmin.get_Y());
     return d;
 }
+
+bool Polygon::intersect_with_BB(const Polygon & pol){
+    if(this->Pmin <= pol.Pmax && this->Pmin >= pol.Pmin){
+            return true;
+    }
+    if(this->Pmax <= pol.Pmax && this-> Pmax >= pol.Pmin){
+        return true;
+    }
+    Point myPoint_leftUP(this->Pmin.get_X(),this->Pmax.get_Y());
+    Point myPoint_right_L(this->Pmax.get_X(), this->Pmin.get_Y());
+    Point BB_point_leftUP(Pmin.get_X(),Pmax.get_Y());
+    Point BB_point_right_L(Pmax.get_X(), Pmin.get_Y());
+    if(myPoint_leftUP <= BB_point_leftUP && myPoint_leftUP >= BB_point_right_L){
+        return true;
+    }
+    if(myPoint_right_L <= BB_point_leftUP && myPoint_right_L >= BB_point_right_L){
+        return true;
+    }
+    return false;
+}
+
+bool Polygon::is_Within_of(const Polygon & pol){
+    if(this->Pmin >= pol.Pmin && this->Pmax <= pol.Pmax)
+            return true;
+        else
+            return false;
+}

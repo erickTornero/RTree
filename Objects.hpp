@@ -61,5 +61,7 @@ class Polygon{
     int cost_two_poligons(Polygon & );
     Point get_Pmax(){return Pmax;}
     Point get_Pmin(){return Pmin;}
+    bool intersect_with_BB(const Polygon &);
+    bool is_Within_of(const Polygon &);      
 };
 #endif

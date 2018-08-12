@@ -111,9 +111,6 @@ bool RTree::insert(RTree_node *& node, d_leaf data){
         this->H++;
     }
 }
-bool RTree::insert_internal(RTree_node * node, d_internal_node data){
-
-}
 
 RTree_node * RTree::cuadratic_split(RTree_node * node){
     int i, j;
@@ -305,4 +302,27 @@ RTree_node * RTree::select_leaf(RTree_node * node, Polygon * p_region){
         }
         return select_leaf(node->data_internal_node[index_min].child,p_region);
     } 
+}
+
+/*
+    Range search.
+*/
+void RTree::range_search_recursive(RTree_node * node, Polygon & query, std::vector<Polygon *> & ans){
+    if(!node->is_leaf){
+        for(int i = 0; i < node->elements;i++){
+            if(query.intersect_with_BB(*node->data_internal_node[i].region)){
+                range_search_recursive(node->data_internal_node[i].child,query,ans);
+            }
+        }
+    }
+    else{
+        for(int i = 0; i < node->elements; i++){
+            if(node->data_leafs[i].region->is_Within_of(query)){
+                ans.push_back(node->data_leafs[i].polygon);
+            }
+        }
+    }
+}
+void RTree::range_search(Polygon query, std::vector<Polygon *> & ans){
+    range_search_recursive(this->root, query, ans);
 }

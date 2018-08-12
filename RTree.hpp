@@ -48,8 +48,6 @@ class RTree{
     bool insert(RTree_node *&, d_leaf);
     //Insert element in an internal node.
     bool insert_internal_region(RTree_node *, d_internal_node  );
-    //General function to insert within internal nodes
-    bool insert_internal(RTree_node *, d_internal_node);
     //Distribute polygons on leaf:
     void distribute_polygons(RTree_node * , RTree_node * , const std::vector<d_leaf> &);
     //Distribute regions on internal nodes:
@@ -62,13 +60,15 @@ class RTree{
     RTree_node * select_leaf(RTree_node * node, Polygon * );
     //Adjust the tree after of insert a polygon
     void adjust_tree(RTree_node *, RTree_node * );
-
+    //Recursive Range Search.
+    void range_search_recursive(RTree_node * , Polygon & , std::vector<Polygon *> &);
     public:
     RTree(int _M): M(_M), m((_M+1)/2),root(nullptr), H(0){};
-    void range_search(RTree_node * , const Polygon & , std::vector<Polygon *> &);
+    
     //Insert Polygon in Front-end
     bool insert_polygon(Polygon * , Polygon *);
-
+    //Range search in Front
+    void range_search(Polygon , std::vector<Polygon *> &);
     //get the k-nearest neighbor Polygons.
     void k_NN_DF(Point q, int k, RTree_node *);
 };
