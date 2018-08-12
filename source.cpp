@@ -35,6 +35,26 @@ int main(){
     Polygon reg15= myPol15;
     Polygon myPol16(Point(0, 0),Point(1, 1));
     Polygon reg16= myPol16;
+
+    Polygon myPol17(Point(20,20),Point(26,21));
+    Polygon reg17 = myPol17;
+    Polygon myPol18(Point(0,19),Point(5,22));
+    Polygon reg18 = myPol18;
+    Polygon myPol19(Point(6,6),Point(8,9));
+    Polygon reg19 = myPol19;
+    Polygon myPol20(Point(16,3),Point(17,5));
+    Polygon reg20 = myPol20;
+    Polygon myPol21(Point(11,21),Point(13,23));
+    Polygon reg21 = myPol21;
+    Polygon myPol22(Point(15,6),Point(19,10));
+    Polygon reg22= myPol22;
+    Polygon myPol23(Point(23,0),Point(26,1));
+    Polygon reg23= myPol23;
+    Polygon myPol24(Point(5,10),Point(6,11));
+    Polygon reg24= myPol24;
+    Polygon myPol25(Point(1,24),Point(3,25));
+    Polygon reg25= myPol25;
+
     RTree MyR_tree(3);
     MyR_tree.insert_polygon(&myPol,&reg);
     MyR_tree.insert_polygon(&myPol2, &reg2);
@@ -52,6 +72,16 @@ int main(){
     MyR_tree.insert_polygon(&myPol14, &reg14);
     MyR_tree.insert_polygon(&myPol15, &reg15);
     MyR_tree.insert_polygon(&myPol16, &reg16);
+
+    MyR_tree.insert_polygon(&myPol17,&reg17);
+    MyR_tree.insert_polygon(&myPol18, &reg18);
+    MyR_tree.insert_polygon(&myPol19, &reg19);
+    MyR_tree.insert_polygon(&myPol20, &reg20);
+    MyR_tree.insert_polygon(&myPol21, &reg21);
+    MyR_tree.insert_polygon(&myPol22, &reg22);
     
+    MyR_tree.insert_polygon(&myPol23, &reg23);
+    MyR_tree.insert_polygon(&myPol24, &reg24);
+    MyR_tree.insert_polygon(&myPol25, &reg25);
     int xx = 22;
 }
