@@ -83,7 +83,7 @@ int main(){
     MyR_tree.insert_polygon(&myPol23, &reg23);
     MyR_tree.insert_polygon(&myPol24, &reg24);
     MyR_tree.insert_polygon(&myPol25, &reg25);
-    std::vector<Polygon * > answ;
-    MyR_tree.range_search(Polygon(Point(8,8),Point(13,11)),answ);
+    std::vector<data_query_return > answ;
+    MyR_tree.range_search(Polygon(Point(1,6),Point(9,9)),answ);
     int xx = 22;
 }

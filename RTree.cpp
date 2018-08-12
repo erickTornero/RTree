@@ -2,7 +2,7 @@
 /*
     Choose origin when split occurs
 */
-RTree_node::RTree_node(bool _l, int _M, RTree_node * f = nullptr):is_leaf(_l), M(_M), elements(0), father(f){
+RTree_node::RTree_node(bool _l, int _M, int _lvl, RTree_node * f = nullptr):is_leaf(_l), M(_M), elements(0), father(f),at_level(_lvl){
     if(this->is_leaf){
         this->data_leafs.resize(M+1); 
     }
@@ -98,7 +98,7 @@ bool RTree::insert(RTree_node *& node, d_leaf data){
     RTree_node * posible_Brother = nullptr;
     RTree_node * leaf_chose = nullptr;
     if(root == nullptr){
-        this->root = new RTree_node(true, this->M);
+        this->root = new RTree_node(true, this->M, 0);
     }
     leaf_chose = select_leaf(this->root, data.region);
     posible_Brother = insert_polygon(leaf_chose, data);
@@ -116,7 +116,7 @@ RTree_node * RTree::cuadratic_split(RTree_node * node){
     int i, j;
     node->choose_origin(i,j);
     if(node->father == nullptr){
-        node->father = new RTree_node(false,this->M);
+        node->father = new RTree_node(false,this->M, H+1);
         //Just insert elements.
         insert_internal_region(node->father, d_internal_node(node->data_leafs[i].region, node));
         this->root = node->father;
@@ -130,7 +130,7 @@ RTree_node * RTree::cuadratic_split(RTree_node * node){
             }
         }
     }
-    RTree_node * brother = new RTree_node(true, this->M, node->father);
+    RTree_node * brother = new RTree_node(true, this->M, node->at_level, node->father);
     insert_internal_region(brother->father, d_internal_node(node->data_leafs[j].region,brother));
     std::vector<d_leaf> tmp;
     for(int n = 0; n < node->elements; n++){
@@ -153,10 +153,9 @@ RTree_node *  RTree::cuadratic_split_internal_nodes(RTree_node * node){
     int i, j;
     node->choose_origin(i,j);
     if(node->father == nullptr){
-        node->father = new RTree_node(false,this->M);
+        node->father = new RTree_node(false,this->M, H+1);
         insert_internal_region(node->father, d_internal_node(node->data_internal_node[i].region, node));
         this->root = node->father;
-        this->H++;
     }
     else{
         //father region must be equal to the node region 'i'
@@ -166,7 +165,7 @@ RTree_node *  RTree::cuadratic_split_internal_nodes(RTree_node * node){
             }
         }
     }
-    RTree_node * brother = new RTree_node(false, this->M, node->father);
+    RTree_node * brother = new RTree_node(false, this->M, node->at_level, node->father);
     insert_internal_region(brother->father, d_internal_node(node->data_internal_node[j].region,brother));
     std::vector<d_internal_node> tmp;
     for(int n = 0; n < node->elements; n++){
@@ -306,11 +305,14 @@ RTree_node * RTree::select_leaf(RTree_node * node, Polygon * p_region){
 
 /*
     Range search.
+    It returns all the path Regions & Polygons Pointers and its respective level.
+    The level will help to draw the path query.
 */
-void RTree::range_search_recursive(RTree_node * node, Polygon & query, std::vector<Polygon *> & ans){
+void RTree::range_search_recursive(RTree_node * node, Polygon & query, std::vector<data_query_return> & ans){
     if(!node->is_leaf){
         for(int i = 0; i < node->elements;i++){
             if(query.intersect_with_BB(*node->data_internal_node[i].region)){
+                ans.push_back(data_query_return(node->data_internal_node[i].region,node->get_level()));
                 range_search_recursive(node->data_internal_node[i].child,query,ans);
             }
         }
@@ -318,11 +320,11 @@ void RTree::range_search_recursive(RTree_node * node, Polygon & query, std::vect
     else{
         for(int i = 0; i < node->elements; i++){
             if(node->data_leafs[i].region->is_Within_of(query)){
-                ans.push_back(node->data_leafs[i].polygon);
+                ans.push_back(data_query_return(node->data_leafs[i].polygon,node->get_level()));
             }
         }
     }
 }
-void RTree::range_search(Polygon query, std::vector<Polygon *> & ans){
+void RTree::range_search(Polygon query, std::vector<data_query_return> & ans){
     range_search_recursive(this->root, query, ans);
 }

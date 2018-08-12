@@ -11,11 +11,13 @@ struct d_leaf{
     void set_data(Polygon * p , Polygon * r ){polygon = p; region = r;}
 };
 struct d_internal_node;
+
 class RTree_node{
     private:
     int M;
     int elements;
     bool is_leaf;
+    int at_level;
     RTree_node * father;
     std::vector<d_leaf> data_leafs;
     std::vector<d_internal_node> data_internal_node;
@@ -25,7 +27,8 @@ class RTree_node{
     //Get the MBB of the node.
     Polygon mbb_node();
     public:
-    RTree_node(bool _l, int _M, RTree_node * f);
+    int get_level(){return at_level;}
+    RTree_node(bool _l, int _M, int _lvl, RTree_node * f);
     friend class RTree;
 };
 struct d_internal_node{
@@ -35,7 +38,12 @@ struct d_internal_node{
     d_internal_node(Polygon *r = nullptr, RTree_node * c = nullptr):region(r),child(c){};
     void set_data(Polygon * r, RTree_node * c){region = r; child = c;}
 };
-
+struct data_query_return{
+    public:
+    Polygon * Pol;
+    int lvl;
+    data_query_return(Polygon *p, int _lvl):Pol(p),lvl(_lvl){};
+};
 class RTree{
     private:
     RTree_node * root;
@@ -61,14 +69,14 @@ class RTree{
     //Adjust the tree after of insert a polygon
     void adjust_tree(RTree_node *, RTree_node * );
     //Recursive Range Search.
-    void range_search_recursive(RTree_node * , Polygon & , std::vector<Polygon *> &);
+    void range_search_recursive(RTree_node * , Polygon & , std::vector<data_query_return> &);
     public:
     RTree(int _M): M(_M), m((_M+1)/2),root(nullptr), H(0){};
     
     //Insert Polygon in Front-end
     bool insert_polygon(Polygon * , Polygon *);
     //Range search in Front
-    void range_search(Polygon , std::vector<Polygon *> &);
+    void range_search(Polygon , std::vector<data_query_return> &);
     //get the k-nearest neighbor Polygons.
     void k_NN_DF(Point q, int k, RTree_node *);
 };
