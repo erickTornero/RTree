@@ -3,10 +3,18 @@
 
 
 int main(){
+    Point aa[] = {Point(1,13),Point(3,13),Point(2,15)};
+    std::vector<Point> a{Point(1,13),Point(3,13),Point(2,15)};
+    Polygon myReal_poligon(a, 1);
+    Polygon reg_real = Polygon(myReal_poligon.get_Pmin(), myReal_poligon.get_Pmax());
+    Polygon pol_point(Point(7,7), 1);
+    Polygon point_reg(pol_point.get_Pmin(),pol_point.get_Pmax());
+    
     Polygon myPol(Point(1,2),Point(2,4));
     Polygon reg = myPol;
     Polygon myPol2(Point(3,1),Point(5,2));
     Polygon reg2 = myPol2;
+    
     Polygon myPol3(Point(8,8),Point(9,9));
     Polygon reg3 = myPol3;
     Polygon myPol4(Point(5,3),Point(6,4));
@@ -19,8 +27,9 @@ int main(){
     Polygon reg7= myPol7;
     Polygon myPol8(Point(10,10),Point(13,11));
     Polygon reg8= myPol8;
-    Polygon myPol9(Point(1,13),Point(3,15));
-    Polygon reg9= myPol9;
+    //Polygon myPol9(Point(1,13),Point(3,15));
+    //Polygon reg9= myPol9;
+    
     Polygon myPol10(Point(1,6),Point(3,7));
     Polygon reg10= myPol10;
     Polygon myPol11(Point(6, 15),Point(7, 16));
@@ -64,7 +73,9 @@ int main(){
     MyR_tree.insert_polygon(&myPol6, &reg6);
     MyR_tree.insert_polygon(&myPol7,&reg7);
     MyR_tree.insert_polygon(&myPol8, &reg8);
-    MyR_tree.insert_polygon(&myPol9, &reg9);
+    //MyR_tree.insert_polygon(&myPol9, &reg9);
+    MyR_tree.insert_polygon(&myReal_poligon, &reg_real);
+    MyR_tree.insert_polygon(&pol_point,&point_reg);
     MyR_tree.insert_polygon(&myPol10, &reg10);
     MyR_tree.insert_polygon(&myPol11,&reg11);
     MyR_tree.insert_polygon(&myPol12, &reg12);

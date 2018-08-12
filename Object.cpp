@@ -1,4 +1,16 @@
 #include "Objects.hpp"
+
+
+Polygon::Polygon(std::vector<Point> p, int k = 0):vertices(p), key(k),corners(p.size()){
+    Polygon mbb = this->get_mbb();
+    this->Pmin = mbb.Pmin;
+    this->Pmax = mbb.Pmax;   
+}
+Polygon::Polygon(Point P, int k = 0):corners(1), key(k) {
+    this->Pmin = P;
+    this->Pmax = P;
+    this->vertices.push_back(P);
+}
 void Polygon::area_added(Polygon & reg, Point & pmin, Point & pmax){
     int x_max = this->Pmax.get_X();
     if(reg.Pmax.get_X() > x_max){
@@ -55,4 +67,22 @@ bool Polygon::is_Within_of(const Polygon & pol){
             return true;
         else
             return false;
+}
+
+Polygon Polygon::get_mbb(){      
+    int x_min= std::numeric_limits<int>::max(); 
+    int y_min = x_min;
+    int x_max = std::numeric_limits<int>::min();
+    int y_max = x_max;
+    for(int i = 0; i < this->corners; i++){
+        if(this->vertices[i].get_X() < x_min)
+            x_min = this->vertices[i].get_X();
+        if(this->vertices[i].get_Y() < y_min)
+            y_min = this->vertices[i].get_Y();
+        if(this->vertices[i].get_X() > x_max)
+            x_max = this->vertices[i].get_X();
+        if(this->vertices[i].get_Y() > y_max)
+            y_max = this->vertices[i].get_Y();
+    }
+    return Polygon(Point(x_min,y_min),Point(x_max,y_max));
 }

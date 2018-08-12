@@ -2,6 +2,7 @@
 #define __OBJECTS
 
 #include <vector>
+#include <limits>
 class Point{
     private:
     //2D - Coordinates of Point.  
@@ -46,22 +47,24 @@ class Polygon{
     Point Pmin;
     Point Pmax;
     int key;
+    int corners;
     //Colection of Points that represent all vertices
     std::vector<Point> vertices;
-    void set_mbb();
     void area_added(Polygon &, Point & , Point & );
     
     public:
     //Initialize the Vertices of Polygon
-    Polygon(std::vector<Point> p, int k):vertices(p), key(k){set_mbb();}
+    Polygon(std::vector<Point> , int) ;
     //It represent a rectangle region.
-    Polygon(Point pmin, Point pmax):Pmin(pmin),Pmax(pmax){};
-
+    Polygon(Point pmin, Point pmax):Pmin(pmin),Pmax(pmax), corners(4){};
+    //Generic Polygon, a point is Polygon
+    Polygon(Point , int);
     //Cost of add a polygon.
     int cost_two_poligons(Polygon & );
     Point get_Pmax(){return Pmax;}
     Point get_Pmin(){return Pmin;}
     bool intersect_with_BB(const Polygon &);
-    bool is_Within_of(const Polygon &);      
+    bool is_Within_of(const Polygon &);
+    Polygon get_mbb();     
 };
 #endif

@@ -2,7 +2,7 @@
 #define __RTREE
 
 #include "Objects.hpp"
-#include <limits>
+
 struct d_leaf{
     public: 
     Polygon * polygon;
