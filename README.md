@@ -4,10 +4,6 @@
 
 ### Polygons points are inserted by copy not with pointers, check & fix this
 
-### Merge clear-code branch to master!
-
-### ------------------------------------------
-
 ## DONE LIST
 
 ## SEARCH OR QUERYS.
