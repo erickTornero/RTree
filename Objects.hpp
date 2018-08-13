@@ -65,6 +65,12 @@ class Polygon{
     Point get_Pmin(){return Pmin;}
     bool intersect_with_BB(const Polygon &);
     bool is_Within_of(const Polygon &);
-    Polygon get_mbb();     
+    Polygon get_mbb();
+    //To get KNN query- Geometric distance.
+    //template <class >
+    float distance_geometric(Point );
+    //
+    //template <class T>
+    float max_distance_geometric(Point );
 };
 #endif

@@ -101,5 +101,8 @@ int main(){
     MyR_tree.insert_polygon(&myPol25, &reg25);
     std::vector<data_query_return > answ;
     MyR_tree.range_search(Polygon(Point(1,6),Point(9,9)),answ);
+
+    std::vector<d_leaf*> ans_knn;
+    MyR_tree.k_NN_DF(Point(0,0),3, ans_knn);
     int xx = 22;
 }

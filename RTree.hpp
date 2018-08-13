@@ -70,6 +70,14 @@ class RTree{
     void adjust_tree(RTree_node *, RTree_node * );
     //Recursive Range Search.
     void range_search_recursive(RTree_node * , Polygon & , std::vector<data_query_return> &);
+
+    //Mothods to get KNN
+    //Recursive count of elements to implement a heuristic in KNN-querys.
+    int count_recursive(RTree_node * );
+    void DFT_recursive(Point q, int k, RTree_node * node, std::vector<d_leaf *> & L, std::vector<float> & ddk);
+    //insert sort
+    template <class T>
+    void insert_sort(std::vector<float> & , std::vector<T*> & );
     public:
     RTree(int _M): M(_M), m((_M+1)/2),root(nullptr), H(0){};
     
@@ -77,7 +85,10 @@ class RTree{
     bool insert_polygon(Polygon * , Polygon *);
     //Range search in Front
     void range_search(Polygon , std::vector<data_query_return> &);
+    
+    
     //get the k-nearest neighbor Polygons.
-    void k_NN_DF(Point q, int k, RTree_node *);
+    void k_NN_DF(Point q, int k, std::vector<d_leaf*> L);
 };
+
 #endif

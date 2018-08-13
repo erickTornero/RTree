@@ -1,5 +1,5 @@
 #include "Objects.hpp"
-
+#include <math.h>
 
 Polygon::Polygon(std::vector<Point> p, int k = 0):vertices(p), key(k),corners(p.size()){
     Polygon mbb = this->get_mbb();
@@ -85,4 +85,54 @@ Polygon Polygon::get_mbb(){
             y_max = this->vertices[i].get_Y();
     }
     return Polygon(Point(x_min,y_min),Point(x_max,y_max));
+}
+
+//template <class T>
+//T Polygon::distance_geometric(Point q){return 0.0;}
+float Polygon::distance_geometric(Point q){
+    float d_X_min = std::numeric_limits<float>::max();
+    if(q.get_X() >= Pmin.get_X() && q.get_X() <= Pmax.get_X()){
+        d_X_min    = 0.0;
+    }
+    else{
+        if(std::abs(q.get_X() - Pmin.get_X()) < d_X_min){
+            d_X_min = std::abs(q.get_X() - Pmin.get_X());
+        }
+        if(std::abs(q.get_X() - Pmax.get_X()) < d_X_min){
+            d_X_min = std::abs(q.get_X() - Pmin.get_X());
+        }
+    }
+    float d_Y_min = std::numeric_limits<float>::max();
+    if(q.get_Y() >= Pmin.get_Y() && q.get_Y() <= Pmax.get_Y()){
+        d_Y_min = 0.0;
+    }
+    else{
+        if(std::abs(q.get_Y() - Pmin.get_Y()) < d_Y_min){
+            d_Y_min = std::abs(q.get_Y() - Pmin.get_Y());
+        }
+        if(std::abs(q.get_Y() - Pmax.get_Y()) < d_Y_min){
+            d_Y_min = std::abs(q.get_Y() - Pmin.get_Y());
+        }
+    }
+    float d = std::sqrt(d_X_min*d_X_min + d_Y_min*d_Y_min);
+    return d;
+}
+
+float Polygon::max_distance_geometric(Point q){
+    float d_X_max = 0.0;
+    if(std::abs(q.get_X() - this->get_Pmin().get_X()) > d_X_max){
+        d_X_max = std::abs(q.get_X() - this->get_Pmin().get_X());
+    }
+    if(std::abs(q.get_X() - get_Pmax().get_X()) > d_X_max){
+        d_X_max = std::abs(q.get_X() - this->get_Pmin().get_X());
+    }
+    float d_Y_max = 0.0;
+    if(std::abs(q.get_Y() - this->get_Pmin().get_Y()) > d_Y_max){
+        d_Y_max = std::abs(q.get_Y() - this->get_Pmin().get_Y());
+    }
+    if(std::abs(q.get_Y() - this->get_Pmax().get_Y()) > d_Y_max){
+        d_Y_max = std::abs(q.get_Y() - this->get_Pmin().get_Y());
+    }
+    float d = std::sqrt(d_X_max*d_X_max+d_Y_max*d_Y_max);
+    return d;
 }

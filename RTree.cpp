@@ -328,3 +328,69 @@ void RTree::range_search_recursive(RTree_node * node, Polygon & query, std::vect
 void RTree::range_search(Polygon query, std::vector<data_query_return> & ans){
     range_search_recursive(this->root, query, ans);
 }
+
+//functions to get the KNN elements.
+int RTree::count_recursive(RTree_node * node){
+    if(node->is_leaf)
+        return node->elements;
+    else{
+        int sum = 0;
+        for( int i; i < node->elements;i++)
+            sum += count_recursive(node->data_internal_node[i].child);
+        return sum;
+    }
+}
+void RTree::DFT_recursive(Point q, int k, RTree_node * node, std::vector<d_leaf *> & L, std::vector<float> & ddk){
+	if(node->is_leaf){
+        for(int i = 0; i < node->elements; i++){
+            ddk.push_back(node->data_leafs[i].region->distance_geometric(q));
+            L.push_back(&node->data_leafs[i]);
+        }
+        insert_sort<d_leaf >(ddk,L);
+        if(ddk.size()>k)
+        {
+            ddk.resize(k);
+            L.resize(k);
+        }
+    }
+    else{
+	    std::vector<float> branch_value(node->elements,std::numeric_limits<float>::max());
+		std::vector<RTree_node *> branch(node->elements);
+		float max_current=0;
+        for(int i = 0; i < node->elements; i++){
+	        branch_value.push_back(node->data_internal_node[i].region->distance_geometric(q));
+            branch.push_back(node->data_internal_node[i].child);
+        }
+        int asegurated=0;
+        insert_sort<RTree_node>(branch_value,branch);
+		for(int i = 0; i < node->elements; i++){
+  	        if(asegurated<k || branch_value[i]<=max_current){
+                DFT_recursive(q,k,branch[i],L,ddk);
+                asegurated += count_recursive(branch[i]);
+            }
+            if(node->data_internal_node[i].region->max_distance_geometric(q)>max_current){
+                max_current=node->data_internal_node[i].region->max_distance_geometric(q);
+            }
+        }
+      }
+}
+template <class T>
+void RTree::insert_sort(std::vector<float> & dtmp, std::vector<T*> & chld){
+    for(int i = 0;i < dtmp.size();i++){
+		float cur_value = dtmp[i];
+		T * cur_child = chld[i];
+		int j = i -1;
+		while(j>=0 && dtmp[j] > cur_value){
+			dtmp[j+1]= dtmp[j];
+			chld[j+1] = chld[j];
+			j--;
+		}
+    	dtmp[j+1] = cur_value;
+		chld[j+1] = cur_child;
+	}
+}
+
+void RTree::k_NN_DF(Point q, int k, std::vector<d_leaf*> L){
+    std::vector<float> dk;
+    DFT_recursive(q, k, this->root,L,dk);
+}
