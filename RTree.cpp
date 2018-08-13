@@ -335,7 +335,7 @@ int RTree::count_recursive(RTree_node * node){
         return node->elements;
     else{
         int sum = 0;
-        for( int i; i < node->elements;i++)
+        for( int i = 0; i < node->elements;i++)
             sum += count_recursive(node->data_internal_node[i].child);
         return sum;
     }
