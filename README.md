@@ -4,10 +4,6 @@
 
 ### Polygons points are inserted by copy not with pointers, check & fix this
 
-
-### k - nearest neighbor
-Join Israel Functions.
-
 ### Merge clear-code branch to master!
 
 ### ------------------------------------------
@@ -35,3 +31,6 @@ At the moment only rectangles are handled, this could be solved with a single ve
 
 ### FIX, parent argument in a sort of functions.
 It's maybe no longer necessary.
+
+### k - nearest neighbor
+Join Israel Functions.
