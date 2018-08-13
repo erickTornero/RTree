@@ -103,6 +103,6 @@ int main(){
     MyR_tree.range_search(Polygon(Point(1,6),Point(9,9)),answ);
 
     std::vector<d_leaf*> ans_knn;
-    MyR_tree.k_NN_DF(Point(0,0),3, ans_knn);
+    MyR_tree.k_NN_DF(Point(10,9),3, ans_knn);
     int xx = 22;
 }
