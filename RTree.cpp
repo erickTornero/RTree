@@ -390,7 +390,7 @@ void RTree::insert_sort(std::vector<float> & dtmp, std::vector<T*> & chld){
 	}
 }
 
-void RTree::k_NN_DF(Point q, int k, std::vector<d_leaf*> L){
+void RTree::k_NN_DF(Point q, int k, std::vector<d_leaf*> &L){
     std::vector<float> dk;
     DFT_recursive(q, k, this->root,L,dk);
 }

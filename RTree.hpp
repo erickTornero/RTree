@@ -88,7 +88,7 @@ class RTree{
     
     
     //get the k-nearest neighbor Polygons.
-    void k_NN_DF(Point q, int k, std::vector<d_leaf*> L);
+    void k_NN_DF(Point q, int k, std::vector<d_leaf*> &L);
 };
 
 #endif
