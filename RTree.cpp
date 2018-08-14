@@ -396,54 +396,54 @@ void RTree::k_NN_DF(Point q, int k, std::vector<d_leaf*> &L){
 }
 
 std::string RTree::show_values_JSON()
-    {
-        std::string json = "";
-        showAll_values_JSON(this->root, 0, json);
-        json.erase(json.length()-1);
-        return "["+json+"]";
-    }
+{
+    std::string json = "";
+    showAll_values_JSON(this->root, 0, json);
+    json.erase(json.length()-1);
+    return "["+json+"]";
+}
 
 void RTree::showAll_values_JSON(RTree_node *node, int level, std::string &json)
+{
+    if(!node->is_leaf)
     {
-        if(!node->is_leaf)
+        for(int i=0; i<node->elements; i++)
         {
-            for(int i=0; i<node->elements; i++)
-            {
-                json +="{";
-                json += "\"level\":"+std::to_string(node->at_level)+",\n";
-                json += "\"is_leaf\":"+std::to_string(0)+",\n";
-                json += "\"elements\":[";
-                json +="["+std::to_string(node->data_internal_node[i].region->get_Pmin().get_X())+","+std::to_string(node->data_internal_node[i].region->get_Pmin().get_Y())+"],\n";
-                json +="["+std::to_string(node->data_internal_node[i].region->get_Pmax().get_X())+","+std::to_string(node->data_internal_node[i].region->get_Pmax().get_Y())+"]\n";
-                json +="]}";
-                json +=",";
+            json +="{";
+            json += "\"level\":"+std::to_string(node->at_level)+",\n";
+            json += "\"is_leaf\":"+std::to_string(0)+",\n";
+            json += "\"elements\":[";
+            json +="["+std::to_string(node->data_internal_node[i].region->get_Pmin().get_X())+","+std::to_string(node->data_internal_node[i].region->get_Pmin().get_Y())+"],\n";
+            json +="["+std::to_string(node->data_internal_node[i].region->get_Pmax().get_X())+","+std::to_string(node->data_internal_node[i].region->get_Pmax().get_Y())+"]\n";
+            json +="]}";
+            json +=",";
 
-                showAll_values_JSON(node->data_internal_node[i].child, level+1, json);
+            showAll_values_JSON(node->data_internal_node[i].child, level+1, json);
 
-            }
-        }
-        else
-        {
-            //std::cout << "ELEMENTS" << std::endl;
-            for(int i=0; i<node->elements; i++)
-            {
-                json +="{";
-                json += "\"level\":"+std::to_string(node->at_level)+",\n";
-                json += "\"is_leaf\":"+std::to_string(1)+",\n";
-                json += "\"elements\":[";
-                std::vector<Point> vertices = node->data_leafs[i].polygon->get_vertices();
-                json += "[";
-                for(int j=0; j<node->data_leafs[i].polygon->get_vertices().size(); j++)
-                {
-                    json +="["+std::to_string(vertices[j].get_X())+","+std::to_string(vertices[j].get_Y())+"]";
-                    if(j+1 != node->data_leafs[i].polygon->get_vertices().size())
-                        json += ",\n";
-                }
-                json += "]";
-                //json +="["+std::to_string(node->data_leafs[i].region->get_Pmin().get_X())+","+std::to_string(node->data_leafs[i].region->get_Pmin().get_Y())+"],\n";
-                //json +="["+std::to_string(node->data_leafs[i].region->get_Pmax().get_X())+","+std::to_string(node->data_leafs[i].region->get_Pmax().get_Y())+"]\n";
-                json +="]}";
-                json +=",";
-            }
         }
     }
+    else
+    {
+        //std::cout << "ELEMENTS" << std::endl;
+        for(int i=0; i<node->elements; i++)
+        {
+            json +="{";
+            json += "\"level\":"+std::to_string(node->at_level)+",\n";
+            json += "\"is_leaf\":"+std::to_string(1)+",\n";
+            json += "\"elements\":[";
+            std::vector<Point> vertices = node->data_leafs[i].polygon->get_vertices();
+            json += "[";
+            for(int j=0; j<node->data_leafs[i].polygon->get_vertices().size(); j++)
+            {
+            json +="["+std::to_string(vertices[j].get_X())+","+std::to_string(vertices[j].get_Y())+"]";
+            if(j+1 != node->data_leafs[i].polygon->get_vertices().size())
+                    json += ",\n";
+            }
+            json += "]";
+            //json +="["+std::to_string(node->data_leafs[i].region->get_Pmin().get_X())+","+std::to_string(node->data_leafs[i].region->get_Pmin().get_Y())+"],\n";
+            //json +="["+std::to_string(node->data_leafs[i].region->get_Pmax().get_X())+","+std::to_string(node->data_leafs[i].region->get_Pmax().get_Y())+"]\n";
+            json +="]}";
+            json +=",";
+        }
+    }
+}
