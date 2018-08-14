@@ -432,10 +432,14 @@ void RTree::showAll_values_JSON(RTree_node *node, int level, std::string &json)
                 json += "\"is_leaf\":"+std::to_string(1)+",\n";
                 json += "\"elements\":[";
                 std::vector<Point> vertices = node->data_leafs[i].polygon->get_vertices();
+                json += "[";
                 for(int j=0; j<node->data_leafs[i].polygon->get_vertices().size(); j++)
                 {
-                    json +="["+std::to_string(vertices[j].get_X())+","+std::to_string(vertices[j].get_Y())+"],\n";
+                    json +="["+std::to_string(vertices[j].get_X())+","+std::to_string(vertices[j].get_Y())+"]";
+                    if(j+1 != node->data_leafs[i].polygon->get_vertices().size())
+                        json += ",\n";
                 }
+                json += "]";
                 //json +="["+std::to_string(node->data_leafs[i].region->get_Pmin().get_X())+","+std::to_string(node->data_leafs[i].region->get_Pmin().get_Y())+"],\n";
                 //json +="["+std::to_string(node->data_leafs[i].region->get_Pmax().get_X())+","+std::to_string(node->data_leafs[i].region->get_Pmax().get_Y())+"]\n";
                 json +="]}";
