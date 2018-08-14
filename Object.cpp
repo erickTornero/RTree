@@ -136,3 +136,7 @@ float Polygon::max_distance_geometric(Point q){
     float d = std::sqrt(d_X_max*d_X_max+d_Y_max*d_Y_max);
     return d;
 }
+
+std::vector<Point> Polygon::get_vertices(){
+    return this->vertices;
+}

@@ -72,5 +72,7 @@ class Polygon{
     //
     //template <class T>
     float max_distance_geometric(Point );
+
+    std::vector<Point> get_vertices();
 };
 #endif

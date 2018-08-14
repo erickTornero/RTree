@@ -2,7 +2,7 @@
 #define __RTREE
 
 #include "Objects.hpp"
-
+#include <string>
 struct d_leaf{
     public: 
     Polygon * polygon;
@@ -89,6 +89,10 @@ class RTree{
     
     //get the k-nearest neighbor Polygons.
     void k_NN_DF(Point q, int k, std::vector<d_leaf*> &L);
+
+    std::string show_values_JSON();
+
+    void showAll_values_JSON(RTree_node *father, int level, std::string &);
 };
 
 #endif
