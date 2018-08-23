@@ -47,23 +47,26 @@ class Polygon{
     Point Pmin;
     Point Pmax;
     int key;
-    int corners;
+    
     //Colection of Points that represent all vertices
     std::vector<Point> vertices;
     void area_added(Polygon &, Point & , Point & );
     
     public:
+    int corners;
     //Initialize the Vertices of Polygon
-    Polygon(std::vector<Point> , int) ;
+    Polygon(std::vector<Point> ) ;
     //It represent a rectangle region.
-    Polygon(Point pmin, Point pmax):Pmin(pmin),Pmax(pmax), corners(4){};
+    Polygon(Point pmin, Point pmax):Pmin(pmin),Pmax(pmax), corners(4), key(-1){};
     //Generic Polygon, a point is Polygon
-    Polygon(Point , int);
+    Polygon(Point);
     //Cost of add a polygon.
     int cost_two_poligons(Polygon & );
     Point get_Pmax(){return Pmax;}
     Point get_Pmin(){return Pmin;}
-    bool intersect_with_BB(const Polygon &);
+    void set_Polygon(Point min, Point max){this->Pmin = min; this->Pmax = max;}
+    bool intersect_with_BB(Polygon &);
+    bool traberse_with(Polygon &);
     bool is_Within_of(const Polygon &);
     Polygon get_mbb();
     //To get KNN query- Geometric distance.
@@ -74,5 +77,9 @@ class Polygon{
     float max_distance_geometric(Point );
 
     std::vector<Point> get_vertices();
+    bool set_key(int );
+    int get_key(){return this->key;}
+
+    ~Polygon();
 };
 #endif

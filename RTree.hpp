@@ -29,6 +29,7 @@ class RTree_node{
     public:
     int get_level(){return at_level;}
     RTree_node(bool _l, int _M, int _lvl, RTree_node * f);
+    ~RTree_node();
     friend class RTree;
 };
 struct d_internal_node{
@@ -50,6 +51,7 @@ class RTree{
     int M;
     int m;
     int H; //Height of tree
+    int indx;
     //Insert Polygon internaly
     RTree_node * insert_polygon(RTree_node *, d_leaf);
     //general function to insert
@@ -69,22 +71,21 @@ class RTree{
     //Adjust the tree after of insert a polygon
     void adjust_tree(RTree_node *, RTree_node * );
     //Recursive Range Search.
-    void range_search_recursive(RTree_node * , Polygon & , std::vector<data_query_return> &);
+    void range_search_recursive(RTree_node * , Polygon & , std::vector<Polygon *> &);
 
     //Mothods to get KNN
-    //Recursive count of elements to implement a heuristic in KNN-querys.
-    int count_recursive(RTree_node * );
-    void DFT_recursive(Point q, int k, RTree_node * node, std::vector<d_leaf *> & L, std::vector<float> & ddk);
+
+    void DFT_recursive(Point , int , RTree_node * , std::vector<d_leaf *> & , std::vector<float> & ,float & );
     //insert sort
     template <class T>
     void insert_sort(std::vector<float> & , std::vector<T*> & );
     public:
-    RTree(int _M): M(_M), m((_M+1)/2),root(nullptr), H(0){};
+    RTree(int _M): M(_M), m((_M+1)/2),root(nullptr), H(0), indx(0){};
     
     //Insert Polygon in Front-end
     bool insert_polygon(Polygon * , Polygon *);
     //Range search in Front
-    void range_search(Polygon , std::vector<data_query_return> &);
+    void range_search(Polygon , std::vector<Polygon *> &);
     
     
     //get the k-nearest neighbor Polygons.
@@ -93,6 +94,11 @@ class RTree{
     std::string show_values_JSON();
 
     void showAll_values_JSON(RTree_node *father, int level, std::string &);
+
+    void get_polygons_JSON(const std::vector<d_leaf*> &, std::string &);
+
+    void get_Range_Search_JSON(const std::vector<Polygon *> &, std::string &);
+    ~RTree();
 };
 
 #endif

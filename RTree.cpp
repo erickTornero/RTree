@@ -1,4 +1,5 @@
 #include "RTree.hpp"
+#include "iostream"
 /*
     Choose origin when split occurs
 */
@@ -83,9 +84,10 @@ RTree_node * RTree::insert_polygon(RTree_node * node, d_leaf data){
     RTree_node * posible_Brother = nullptr;
         //There's space in the leaf?
     if(node->elements < node->M){
+            if(data.polygon->set_key(this->indx))
+                this->indx++;
             node->data_leafs[node->elements] = data;
-            node->elements++;
-            
+            node->elements++;            
     }
     else{
         node->data_leafs[node->elements] = data;
@@ -185,7 +187,10 @@ RTree_node *  RTree::cuadratic_split_internal_nodes(RTree_node * node){
     return brother;
 }
 bool RTree::insert_internal_region(RTree_node * node, d_internal_node data ){
-    data.region = new Polygon(data.region->get_Pmin(),data.region->get_Pmax());    
+    Polygon * reg = new Polygon(data.region->get_Pmin(),data.region->get_Pmax());
+    if(reg->set_key(this->indx))
+        this->indx++;
+    data.region = reg;    
     node->data_internal_node[node->elements] = data;
     node->elements++;
 }
@@ -260,10 +265,14 @@ void RTree::adjust_tree(RTree_node * node, RTree_node *brother){
     if(node->father != nullptr){
         for(int m = 0; m < node->father->elements; m++){
             if(node->father->data_internal_node[m].child == node){
+                int key = node->father->data_internal_node[m].region->get_key();
                 *node->father->data_internal_node[m].region = node->mbb_node();
+                node->father->data_internal_node[m].region->set_key(key);
             }
             else if(node->father->data_internal_node[m].child == brother){
+                int key = brother->father->data_internal_node[m].region->get_key();
                 *brother->father->data_internal_node[m].region = brother->mbb_node();
+                brother->father->data_internal_node[m].region->set_key(key);
             }
         }
         if(node->elements > this->M && !node->is_leaf){
@@ -308,68 +317,67 @@ RTree_node * RTree::select_leaf(RTree_node * node, Polygon * p_region){
     It returns all the path Regions & Polygons Pointers and its respective level.
     The level will help to draw the path query.
 */
-void RTree::range_search_recursive(RTree_node * node, Polygon & query, std::vector<data_query_return> & ans){
-    if(!node->is_leaf){
-        for(int i = 0; i < node->elements;i++){
-            if(query.intersect_with_BB(*node->data_internal_node[i].region)){
-                ans.push_back(data_query_return(node->data_internal_node[i].region,node->get_level()));
-                range_search_recursive(node->data_internal_node[i].child,query,ans);
+void RTree::range_search_recursive(RTree_node * node, Polygon & query, std::vector<Polygon *> & ans){
+    if(node != nullptr){
+        if(!node->is_leaf){
+            for(int i = 0; i < node->elements;i++){
+                if(node->data_internal_node[i].region->intersect_with_BB(query) ){
+                    //ans.push_back(data_query_return(node->data_internal_node[i].region,node->get_level()));
+                    range_search_recursive(node->data_internal_node[i].child,query,ans);
+                }
             }
         }
-    }
-    else{
-        for(int i = 0; i < node->elements; i++){
-            if(node->data_leafs[i].region->is_Within_of(query)){
-                ans.push_back(data_query_return(node->data_leafs[i].polygon,node->get_level()));
+        else{
+            for(int i = 0; i < node->elements; i++){
+                if(node->data_leafs[i].region->is_Within_of(query)){
+                    ans.push_back(node->data_leafs[i].polygon);
+                }
             }
         }
     }
 }
-void RTree::range_search(Polygon query, std::vector<data_query_return> & ans){
-    range_search_recursive(this->root, query, ans);
+void RTree::range_search(Polygon query, std::vector<Polygon *> & ans){
+    int x_min = query.get_Pmin().get_X();
+    int y_min = query.get_Pmin().get_Y();
+    if(query.get_Pmax().get_X() < x_min)
+        x_min = query.get_Pmax().get_X();
+    if(query.get_Pmax().get_Y() < y_min)
+        y_min = query.get_Pmax().get_Y();
+    int x_max = query.get_Pmin().get_X();
+    int y_max = query.get_Pmin().get_Y();
+    if(query.get_Pmax().get_X() > x_max)
+        x_max = query.get_Pmax().get_X();
+    if(query.get_Pmax().get_Y() > y_max)
+        y_max = query.get_Pmax().get_Y();
+    Polygon q(Point(x_min,y_min),Point(x_max,y_max));
+    range_search_recursive(this->root, q, ans);
 }
 
-//functions to get the KNN elements.
-int RTree::count_recursive(RTree_node * node){
-    if(node->is_leaf)
-        return node->elements;
-    else{
-        int sum = 0;
-        for( int i = 0; i < node->elements;i++)
-            sum += count_recursive(node->data_internal_node[i].child);
-        return sum;
-    }
-}
-void RTree::DFT_recursive(Point q, int k, RTree_node * node, std::vector<d_leaf *> & L, std::vector<float> & ddk){
+void RTree::DFT_recursive(Point q, int k, RTree_node * node, std::vector<d_leaf *> & L, std::vector<float> & ddk,float & poor){
 	if(node->is_leaf){
         for(int i = 0; i < node->elements; i++){
             ddk.push_back(node->data_leafs[i].region->distance_geometric(q));
             L.push_back(&node->data_leafs[i]);
         }
-        insert_sort<d_leaf >(ddk,L);
         if(ddk.size()>k)
         {
+	        insert_sort<d_leaf>(ddk,L);
             ddk.resize(k);
             L.resize(k);
+        	poor=ddk[k-1];
         }
     }
     else{
-	    std::vector<float> branch_value(node->elements,std::numeric_limits<float>::max());
-		std::vector<RTree_node *> branch(node->elements);
-		float max_current=0;
+	    std::vector<float> branch_value;
+		std::vector<RTree_node *> branch;
         for(int i = 0; i < node->elements; i++){
 	        branch_value.push_back(node->data_internal_node[i].region->distance_geometric(q));
             branch.push_back(node->data_internal_node[i].child);
         }
-        int asegurated=0;
         insert_sort<RTree_node>(branch_value,branch);
 		for(int i = 0; i < node->elements; i++){
-  	        if(asegurated<k || branch_value[i]<=max_current){
-                DFT_recursive(q,k,branch[i],L,ddk);
-                asegurated += count_recursive(branch[i]);
-            }
-            if(node->data_internal_node[i].region->max_distance_geometric(q)>max_current){
-                max_current=node->data_internal_node[i].region->max_distance_geometric(q);
+  	        if(branch_value[i]<=poor){
+                DFT_recursive(q,k,branch[i],L,ddk,poor);
             }
         }
       }
@@ -392,14 +400,20 @@ void RTree::insert_sort(std::vector<float> & dtmp, std::vector<T*> & chld){
 
 void RTree::k_NN_DF(Point q, int k, std::vector<d_leaf*> &L){
     std::vector<float> dk;
-    DFT_recursive(q, k, this->root,L,dk);
+    float poor = std::numeric_limits<float>::max();
+    
+    if(this->root != nullptr)
+        DFT_recursive(q, k, this->root,L,dk,poor);
 }
 
 std::string RTree::show_values_JSON()
 {
     std::string json = "";
-    showAll_values_JSON(this->root, 0, json);
-    json.erase(json.length()-1);
+
+    if(this->root != nullptr)
+        showAll_values_JSON(this->root, 0, json);
+    if(json.length() != 0)
+        json.erase(json.length()-1);
     return "["+json+"]";
 }
 
@@ -409,22 +423,22 @@ void RTree::showAll_values_JSON(RTree_node *node, int level, std::string &json)
     {
         for(int i=0; i<node->elements; i++)
         {
+            
             json +="{";
             json += "\"level\":"+std::to_string(node->at_level)+",\n";
             json += "\"is_leaf\":"+std::to_string(0)+",\n";
+            json += "\"key\":"+std::to_string(node->data_internal_node[i].region->get_key())+",\n";
             json += "\"elements\":[";
             json +="["+std::to_string(node->data_internal_node[i].region->get_Pmin().get_X())+","+std::to_string(node->data_internal_node[i].region->get_Pmin().get_Y())+"],\n";
             json +="["+std::to_string(node->data_internal_node[i].region->get_Pmax().get_X())+","+std::to_string(node->data_internal_node[i].region->get_Pmax().get_Y())+"]\n";
             json +="]}";
             json +=",";
-
             showAll_values_JSON(node->data_internal_node[i].child, level+1, json);
 
         }
     }
     else
     {
-        //std::cout << "ELEMENTS" << std::endl;
         for(int i=0; i<node->elements; i++)
         {
             json +="{";
@@ -440,10 +454,82 @@ void RTree::showAll_values_JSON(RTree_node *node, int level, std::string &json)
                     json += ",\n";
             }
             json += "]";
-            //json +="["+std::to_string(node->data_leafs[i].region->get_Pmin().get_X())+","+std::to_string(node->data_leafs[i].region->get_Pmin().get_Y())+"],\n";
-            //json +="["+std::to_string(node->data_leafs[i].region->get_Pmax().get_X())+","+std::to_string(node->data_leafs[i].region->get_Pmax().get_Y())+"]\n";
             json +="]}";
             json +=",";
+        }
+    }
+}
+void RTree::get_polygons_JSON(const std::vector<d_leaf*> & ans,std::string &json){
+    json += "[";
+    for(int i=0; i<ans.size(); i++){
+        json +="[";    
+        for(int j = 0; j < ans[i]->polygon->corners;j++){
+           json +="[";
+           json += std::to_string(ans[i]->polygon->get_vertices()[j].get_X());
+           json += ",";
+           json += std::to_string(ans[i]->polygon->get_vertices()[j].get_Y()); 
+           json +="]";
+           if((j+1) != ans[i]->polygon->corners)
+                json +=",";
+        }
+        json +="]";
+        if((i+1) != ans.size())
+            json +=",";
+    }
+    json += "]";
+}
+
+void RTree::get_Range_Search_JSON(const std::vector<Polygon *> & data, std::string &json){
+    json += "[";
+    for(int i=0; i<data.size(); i++){
+        json +="[";
+        json +="{";
+        json +="\"elements\":[";    
+        auto dat = data[i]->get_vertices();
+        for(int j = 0; j < dat.size(); j++){
+            json +="[";  
+            
+            json += std::to_string(dat[j].get_X());
+            json += ",";
+            json += std::to_string(dat[j].get_Y()); 
+        
+            json +="]";
+            if((j+1) != dat.size())
+                    json +=",";
+        }            
+    
+        json +="],";
+        json+="\"level\":"+std::to_string(0);
+        json += "}";
+
+        json +="]";
+        if((i+1) != data.size())
+            json +=",\n";
+    }
+    json += "]";
+}
+
+RTree::~RTree(){
+    if(this->root != nullptr)
+        delete this->root;
+}
+RTree_node::~RTree_node(){
+    if(!this->is_leaf){
+        for(int i = 0; i < this->elements; i++){
+            delete this->data_internal_node[i].child;
+            this->data_internal_node[i].child = nullptr;
+            delete this->data_internal_node[i].region;
+            this->data_internal_node[i].region = nullptr;
+        }
+    }
+    else{
+        for(int i = 0; i < this->elements; i++){
+            if(this->data_leafs[i].polygon!=nullptr){
+                delete this->data_leafs[i].polygon;
+                this->data_leafs[i].polygon = nullptr;
+                delete this->data_leafs[i].region;
+                this->data_leafs[i].region = nullptr;
+            }
         }
     }
 }

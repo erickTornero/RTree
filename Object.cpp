@@ -1,12 +1,13 @@
 #include "Objects.hpp"
 #include <math.h>
-
-Polygon::Polygon(std::vector<Point> p, int k = 0):vertices(p), key(k),corners(p.size()){
+#include <stdlib.h>
+#include <iostream>
+Polygon::Polygon(std::vector<Point> p):vertices(p), key(-1),corners(p.size()){
     Polygon mbb = this->get_mbb();
     this->Pmin = mbb.Pmin;
     this->Pmax = mbb.Pmax;   
 }
-Polygon::Polygon(Point P, int k = 0):corners(1), key(k) {
+Polygon::Polygon(Point P):corners(1), key(-1) {
     this->Pmin = P;
     this->Pmax = P;
     this->vertices.push_back(P);
@@ -42,7 +43,11 @@ int Polygon::cost_two_poligons(Polygon & reg){
     return d;
 }
 
-bool Polygon::intersect_with_BB(const Polygon & pol){
+bool Polygon::intersect_with_BB(Polygon & pol){
+    if(pol.traberse_with(*this))
+        return true;
+    if(pol.is_Within_of(*this))
+        return true;
     if(this->Pmin <= pol.Pmax && this->Pmin >= pol.Pmin){
             return true;
     }
@@ -59,14 +64,23 @@ bool Polygon::intersect_with_BB(const Polygon & pol){
     if(myPoint_right_L <= BB_point_leftUP && myPoint_right_L >= BB_point_right_L){
         return true;
     }
+    //if(this->traberse_with(pol))
+    //    return true;
+    
     return false;
 }
 
 bool Polygon::is_Within_of(const Polygon & pol){
     if(this->Pmin >= pol.Pmin && this->Pmax <= pol.Pmax)
             return true;
-        else
-            return false;
+    else
+        return false;
+}
+bool Polygon::traberse_with(Polygon & other){
+    if(this->Pmin.get_X() <= other.Pmax.get_X() && this->Pmax.get_Y() <= other.Pmax.get_Y())
+        return true;
+    if(this->Pmin.get_Y() <= other.Pmax.get_Y() && this->Pmax.get_X() <= other.Pmax.get_X())
+        return true;
 }
 
 Polygon Polygon::get_mbb(){      
@@ -95,11 +109,11 @@ float Polygon::distance_geometric(Point q){
         d_X_min    = 0.0;
     }
     else{
-        if(std::abs(q.get_X() - Pmin.get_X()) < d_X_min){
-            d_X_min = std::abs(q.get_X() - Pmin.get_X());
+        if(abs(q.get_X() - Pmin.get_X()) < d_X_min){
+            d_X_min = abs(q.get_X() - Pmin.get_X());
         }
-        if(std::abs(q.get_X() - Pmax.get_X()) < d_X_min){
-            d_X_min = std::abs(q.get_X() - Pmin.get_X());
+        if(abs(q.get_X() - Pmax.get_X()) < d_X_min){
+            d_X_min = abs(q.get_X() - Pmax.get_X());
         }
     }
     float d_Y_min = std::numeric_limits<float>::max();
@@ -107,36 +121,47 @@ float Polygon::distance_geometric(Point q){
         d_Y_min = 0.0;
     }
     else{
-        if(std::abs(q.get_Y() - Pmin.get_Y()) < d_Y_min){
-            d_Y_min = std::abs(q.get_Y() - Pmin.get_Y());
+        if(abs(q.get_Y() - Pmin.get_Y()) < d_Y_min){
+            d_Y_min = abs(q.get_Y() - Pmin.get_Y());
         }
-        if(std::abs(q.get_Y() - Pmax.get_Y()) < d_Y_min){
-            d_Y_min = std::abs(q.get_Y() - Pmin.get_Y());
+        if(abs(q.get_Y() - Pmax.get_Y()) < d_Y_min){
+            d_Y_min = abs(q.get_Y() - Pmax.get_Y());
         }
     }
-    float d = std::sqrt(d_X_min*d_X_min + d_Y_min*d_Y_min);
+    float d = sqrt(d_X_min*d_X_min + d_Y_min*d_Y_min);
     return d;
 }
 
 float Polygon::max_distance_geometric(Point q){
     float d_X_max = 0.0;
-    if(std::abs(q.get_X() - this->get_Pmin().get_X()) > d_X_max){
-        d_X_max = std::abs(q.get_X() - this->get_Pmin().get_X());
+    if(abs(q.get_X() - this->get_Pmin().get_X()) > d_X_max){
+        d_X_max = abs(q.get_X() - this->get_Pmin().get_X());
     }
-    if(std::abs(q.get_X() - get_Pmax().get_X()) > d_X_max){
-        d_X_max = std::abs(q.get_X() - this->get_Pmin().get_X());
+    if(abs(q.get_X() - get_Pmax().get_X()) > d_X_max){
+        d_X_max = abs(q.get_X() - this->get_Pmax().get_X());
     }
     float d_Y_max = 0.0;
-    if(std::abs(q.get_Y() - this->get_Pmin().get_Y()) > d_Y_max){
-        d_Y_max = std::abs(q.get_Y() - this->get_Pmin().get_Y());
+    if(abs(q.get_Y() - this->get_Pmin().get_Y()) > d_Y_max){
+        d_Y_max = abs(q.get_Y() - this->get_Pmin().get_Y());
     }
-    if(std::abs(q.get_Y() - this->get_Pmax().get_Y()) > d_Y_max){
-        d_Y_max = std::abs(q.get_Y() - this->get_Pmin().get_Y());
+    if(abs(q.get_Y() - this->get_Pmax().get_Y()) > d_Y_max){
+        d_Y_max = abs(q.get_Y() - this->get_Pmax().get_Y());
     }
-    float d = std::sqrt(d_X_max*d_X_max+d_Y_max*d_Y_max);
+    float d = sqrt(d_X_max*d_X_max+d_Y_max*d_Y_max);
     return d;
 }
 
 std::vector<Point> Polygon::get_vertices(){
     return this->vertices;
+}
+
+bool Polygon::set_key(int k){
+    if(this->key==-1){
+        this->key = k;
+        return true;
+    }
+    return false;
+}
+
+Polygon::~Polygon(){    
 }
