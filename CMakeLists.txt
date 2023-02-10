@@ -8,4 +8,4 @@ include_directories(${INCLUDES_DIR})
 
 
 set(SOURCES ${SOURCE_DIR}/source.cpp ${SOURCE_DIR}/Objects.cpp ${SOURCE_DIR}/RTree.cpp)
-add_executable(binary ${SOURCES})
+add_executable(rtree ${SOURCES})
