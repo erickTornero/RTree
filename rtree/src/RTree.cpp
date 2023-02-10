@@ -112,6 +112,7 @@ bool RTree::insert(RTree_node *& node, d_leaf data){
         adjust_tree(node, internal_brother);
         this->H++;
     }
+    return true;
 }
 
 RTree_node * RTree::cuadratic_split(RTree_node * node){
@@ -193,6 +194,7 @@ bool RTree::insert_internal_region(RTree_node * node, d_internal_node data ){
     data.region = reg;    
     node->data_internal_node[node->elements] = data;
     node->elements++;
+    return true;
 }
 
 void RTree::distribute_polygons(RTree_node * node, RTree_node * brother, const std::vector<d_leaf> & data){

@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
+
 Polygon::Polygon(std::vector<Point> p):vertices(p), key(-1),corners(p.size()){
     Polygon mbb = this->get_mbb();
     this->Pmin = mbb.Pmin;
@@ -81,6 +82,7 @@ bool Polygon::traberse_with(Polygon & other){
         return true;
     if(this->Pmin.get_Y() <= other.Pmax.get_Y() && this->Pmax.get_X() <= other.Pmax.get_X())
         return true;
+    return false;
 }
 
 Polygon Polygon::get_mbb(){      
